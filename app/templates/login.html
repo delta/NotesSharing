@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+        <h1> Login  </h1>
+        <form action= "" method="POST" name="login">
+                {{ form.hidden_tag() }}
+                <h4> Enter Department 
+                {{ form.department(size=20) }}
+                {% for error in form.department.errors %}
+                        <span style="color:red;">[ {{ error }} ]</span>
+                {% endfor %}
+                </h4>
+
+                <input type="submit" class="btn btn-success" value="Sign In"></input>
+        </form>
+{% endblock %}
+
+
+                        
