@@ -9,6 +9,12 @@ class User(db.Model):
 
 class Department(db.Model):
         department = db.Column(db.String(64) , primary_key = True)
+        
+        def is_authenticated(self):
+                return True # Return False if the user object is not allowed for some reason
+
+        def is_active(self):
+                return True # Return False if they are banned 
 
         def __repr__(self):
                 return '<Department %r>' % (self.department)

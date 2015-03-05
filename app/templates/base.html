@@ -5,13 +5,22 @@
                 {% else %}
                 <title> Fire Notes </title>
                 {% endif %}
+                
         </head>
+        <style>
+                h1 , h2 {
+                        text-align : center ;
+                }
+        </style>
         <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
 
 
         <body>
-
-                <div class="container"> Fire Notes : <a href="/index">Home</a></div>
+                <h1> Fire Notes </h1>
+                <div class="container"> Fire Notes : <a href="/">Home</a></div>
+                        {% for dept in x %}
+                        <h4><a href="/{{dept}}">{{dept}}</a></h4>
+                        {% endfor %}
                 <hr>
                         {% with messages = get_flashed_messages() %}
                                 {% if messages %}
@@ -24,5 +33,6 @@
                         {% endwith %}
                         {% block content %}
                         {% endblock %}
+
         </body>
 </html>
