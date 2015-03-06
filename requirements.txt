@@ -1,0 +1,11 @@
+flask
+flask-login
+flask-mail
+flask-sqlalchemy
+sqlalchemy-migrate
+flask-whooshalchemy
+flask-wtf
+flask-babel
+flup
+sqlalchemy==0.7.9
+pytz==2013b
