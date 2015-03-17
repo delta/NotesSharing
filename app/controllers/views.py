@@ -4,7 +4,7 @@ from werkzeug import secure_filename
 from sqlalchemy import or_
 from app import app, db #Your init files 
 from .forms import LoginForm
-from ..models.models import Department , files 
+from ..models import Department, files 
 import os 
 
 departments = Department.query.all()

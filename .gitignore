@@ -2,3 +2,5 @@
 *.db*
 /db_repository
 *.pdf
+**/*.pyc
+tmp
