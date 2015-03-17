@@ -1,12 +1,11 @@
-from flask import Flask 
-# We also need to initialize our database 
-from flask.ext.sqlalchemy import SQLAlchemy 
+from flask import Flask
+from flask.ext.sqlalchemy import SQLAlchemy
+# We also need to initialize our database
 
 
-app = Flask(__name__) #Our Flask instance 
-app.config.from_object('config') #Setting our WTF config
+app = Flask(__name__)  # Our Flask instance
+app.config.from_object('config')  # Setting our WTF config
 db = SQLAlchemy(app)
 
 from controllers import views
 import models
-
