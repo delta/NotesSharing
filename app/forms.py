@@ -8,5 +8,3 @@ class LoginForm(Form):
         # If you have validators attached , they have errors added under form.fieldname.erros
         # remember_me = BooleanField('remember me', default = False)
 
-
-
