@@ -7,4 +7,6 @@ app = Flask(__name__) #Our Flask instance
 app.config.from_object('config') #Setting our WTF config
 db = SQLAlchemy(app)
 
-from app import views ,models
+from controllers import views
+from models import models
+
