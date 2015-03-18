@@ -1,7 +1,7 @@
 from flask import render_template, flash, redirect, request, session, url_for, g, send_file
 from flask.ext.login import login_user, logout_user, current_user, login_required
 from werkzeug import secure_filename
-from sqlalchemy import or_,and_
+from sqlalchemy import or_, and_
 from app import app, db  # Your init files
 from .forms import LoginForm
 from ..models import Department, files
@@ -41,7 +41,7 @@ def UploadOrView(name, semester):
                 Get all the files from the db and display to the user
         '''
         all_files = files.query.filter(and_(files.department.like(name),
-                                           files.semester.like(int(semester))))
+                                            files.semester.like(int(semester))))
         list_of_files = [(file.id, file.filename) for file in all_files.all()]
         return render_template("notes.html", list_of_files=list_of_files, dept=name, sem=semester)
 
