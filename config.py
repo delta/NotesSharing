@@ -12,9 +12,9 @@ print basedir
 
 
 #Where we are going to store the files 
-UPLOAD_FOLDER = basedir+'/tmp/'
+UPLOAD_FOLDER = basedir + '/tmp/'
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
 # IMAP Login Config
-IMAP_SERVER_IP = ''
-IMAP_SERVER_PORT = ''
+IMAP_SERVER = 'webmail.nitt.edu'
+IMAP_SERVER_PORT = '143'
