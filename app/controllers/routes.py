@@ -59,6 +59,17 @@ def UploadOrView(name, semester):
         list_of_files = [(file.id, file.filename) for file in all_files.all()]
         return render_template('notes.html', list_of_files=list_of_files, dept=name, sem=semester)
 
+@app.route('/static/css/<filename>')
+def serveCSS(filename):
+    return send_file("static/css/"+filename)
+
+@app.route('/static/fonts/<filename>')
+def serveFonts(filename):
+    return send_file("static/fonts/"+filename)
+
+@app.route('/static/js/<filename>')
+def serveJs(filename):
+    return send_file("static/js/"+filename)
 
 @app.route('/<name>/<semester>/<filename>')
 def Download(name, semester, filename):
