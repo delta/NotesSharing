@@ -100,7 +100,7 @@ def login():
             print valid_login
             if valid_login:
                 print 'Logged in'
-                return redirect(url_for('index'))
+                return redirect(url_for('navigate', name=session['dept']))
             else:
                 print 'fuck'
                 return redirect(url_for('login'))
