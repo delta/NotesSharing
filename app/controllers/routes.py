@@ -107,3 +107,11 @@ def login():
 
     elif request.method == 'GET':
         return render_template('login.html', title='Sign In', form=form)
+
+
+@app.route('/logout', methods=['GET', 'POST'])
+def logout():
+    # if 'rollnumber' not in session:
+    #         redirect(url_for('login'))
+    session.clear()
+    return redirect(url_for('login'))
