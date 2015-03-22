@@ -3,9 +3,8 @@
                 <div class="jumbotron">
                   {% if session['rollnumber'] %}
                   <h4 align="center">Welcome {{session['rollnumber']}} </h4>
-                  {% endif %}
-                  <h4 align="center">Department</h4>
-                      
+                  {% endif %}   
+                  <br>
                         <div align="center">
                           {% for dept in x %}
                             <a class="btn btn-primary btn-lg" href="/{{dept}}">{{dept}}</a>

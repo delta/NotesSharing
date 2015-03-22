@@ -4,9 +4,7 @@
 <div class="jumbotron" align="center">
                 
 <h4> Welcome to {{dept}} ! </h4>
-<h5> Choose the semester:</h5>
-                  
-                    
+<br>                   
         {% for sem in semesters %}
           <a class="btn btn-primary btn-lg" href="/{{dept}}/{{sem}}">Semester {{sem}}</a>
         {% endfor %}
