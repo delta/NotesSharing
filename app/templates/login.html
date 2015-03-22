@@ -2,29 +2,30 @@
 
 {% block content %}
 <div class="jumbotron" style="width:30%; margin:0 auto;" align="center">
-	<div >
-		<form action= "" method="POST" name="login">
-			{{ form.hidden_tag() }} 
-			<div >
-				{{ form.rollnumber(size=9,class="form-control",placeholder="Enter roll number") }}
-				{% for error in form.rollnumber.errors %}
-				<span style="color:red;">[ {{ error }} ]</span>
-				{% endfor %}
-			</div>
-			
-			<div >
-				{{ form.password(size=9,class="form-control", placeholder="Webmail Password")}}
-				{% for error in form.password.errors %}
-				<span style="color:red;">[ {{ error }} ]</span>
-				{% endfor %}
-				<div class="checkbox">
-					<label>
-						<button type="submit" class="btn btn-primary">Submit</button>
-					</label>
-				</div>
-			</div>
-		</form>
-	</div>
+    <div >
+        <form action= "" method="POST" name="login">
+            {{ form.hidden_tag() }} 
+            {{ message }}
+            <div >
+                {{ form.rollnumber(size=9,class="form-control",placeholder="Enter roll number") }}
+                {% for error in form.rollnumber.errors %}
+                <span style="color:red;">[ {{ error }} ]</span>
+                {% endfor %}
+            </div>
+
+            <div >
+                {{ form.password(size=9,class="form-control", placeholder="Webmail Password")}}
+                {% for error in form.password.errors %}
+                <span style="color:red;">[ {{ error }} ]</span>
+                {% endfor %}
+                <div class="checkbox">
+                    <label>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </label>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
 
 {% endblock %}

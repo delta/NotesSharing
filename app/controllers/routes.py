@@ -89,7 +89,10 @@ def login():
 
     form = LoginForm()
 
-    if request.method == 'POST':
+    if request.method == 'GET':
+        return render_template('login.html', title='Sign In', form=form)
+
+    elif request.method == 'POST':
         # Whether all parts of the form is submitted or not
         if form.validate_on_submit():
             flash('Login requested for Department = {0}'.format(form.rollnumber))
@@ -98,10 +101,13 @@ def login():
             #  print request.form['password']
             valid_login = server_login(request.form['rollnumber'], request.form['password'])
             print valid_login
-            if valid_login:
-                    # check if the rollnumber exist in the user database 
-                    # if it doesnt then add it to the db 
-                    # else redirect to index 
+            if not valid_login:
+                print 'fuck'
+                return redirect(url_for('login'))
+            else:
+                # check if the rollnumber exist in the user database 
+                # if it doesnt then add it to the db 
+                # else redirect to index 
                 user = User.query.filter_by(rollNo = request.form['rollnumber']).all()
                 if not len(user):
                         new_entry = User(rollNo = request.form['rollnumber'])
@@ -110,12 +116,8 @@ def login():
                         print 'new Entry added baby'
                 print 'Logged in'
                 return redirect(url_for('navigate', name=session['dept']))
-            else:
-                print 'fuck'
-                return redirect(url_for('login'))
-
-    elif request.method == 'GET':
-        return render_template('login.html', title='Sign In', form=form)
+    
+    return render_template('login.html', title='Sign In', form=form)
 
 
 @app.route('/logout', methods=['GET', 'POST'])
