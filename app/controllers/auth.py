@@ -3,7 +3,7 @@ import time
 from .. import flask
 
 IMAP_SERVER = 'webmail.nitt.edu'
-DEPARTMENTS = {6: 'CSE'}
+DEPARTMENTS = {6: 'CSE', 10: 'ICE', 12: 'META', 14:'PROD', 11:'MECH', 7:'EEE'}
 
 
 def process_username(username):
@@ -27,7 +27,10 @@ def parse_username(username):
     grad_year = int(username[4:6])
     year = cur_year - grad_year
     dept_num = int(username[1:3])
-    dept = DEPARTMENTS[dept_num]
+    try:
+        dept = DEPARTMENTS[dept_num]
+    except KeyError:
+        dept = 'CSE'
     return year, dept
 
 

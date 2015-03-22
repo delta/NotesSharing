@@ -109,7 +109,7 @@ def login():
                         db.session.commit()
                         print 'new Entry added baby'
                 print 'Logged in'
-                return redirect(url_for('index'))
+                return redirect(url_for('navigate', name=session['dept']))
             else:
                 print 'fuck'
                 return redirect(url_for('login'))
