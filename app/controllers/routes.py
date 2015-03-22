@@ -4,7 +4,7 @@ from werkzeug import secure_filename
 from sqlalchemy import or_, and_
 from app import app, db  # Your init files
 from .forms import LoginForm
-from ..models import Department, files
+from ..models import Department, files,User
 import os
 from .auth import server_login
 
@@ -88,17 +88,26 @@ def Download(name, semester, filename):
 def login():
 
     form = LoginForm()
+
     if request.method == 'POST':
         # Whether all parts of the form is submitted or not
         if form.validate_on_submit():
-            flash(
-                'Login requested for Department = {0}'.format(form.rollnumber))
+            flash('Login requested for Department = {0}'.format(form.rollnumber))
             form.rollnumber = request.form['rollnumber']
             print request.form['rollnumber']
             #  print request.form['password']
             valid_login = server_login(request.form['rollnumber'], request.form['password'])
             print valid_login
             if valid_login:
+                    # check if the rollnumber exist in the user database 
+                    # if it doesnt then add it to the db 
+                    # else redirect to index 
+                user = User.query.filter_by(rollNo = request.form['rollnumber']).all()
+                if not len(user):
+                        new_entry = User(rollNo = request.form['rollnumber'])
+                        db.session.add(new_entry)
+                        db.session.commit()
+                        print 'new Entry added baby'
                 print 'Logged in'
                 return redirect(url_for('index'))
             else:
@@ -111,7 +120,5 @@ def login():
 
 @app.route('/logout', methods=['GET', 'POST'])
 def logout():
-    # if 'rollnumber' not in session:
-    #         redirect(url_for('login'))
     session.clear()
     return redirect(url_for('login'))
