@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+                <div class="jumbotron">
+                  <h4 align="center">Department</h4>
+                      
+                        <div align="center">
+                          {% for dept in x %}
+                            <a class="btn btn-primary btn-lg" href="/{{dept}}">{{dept}}</a>
+                          {% endfor %}
+                          
+                        </div>
+                 
+                </div>
+{% endblock %}

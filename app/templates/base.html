@@ -13,12 +13,16 @@
         <style>
                 h1 , h2 {
                         text-align : center ;
-                        font: 400 100px/1.5 'Pacifico', Helvetica, sans-serif;
+                        font: 80px 'Pacifico', Helvetica, sans-serif;
                         color: #2b2b2b;
                         text-shadow: 3px 3px 0px rgba(0,0,0,0.1), 7px 7px 0px rgba(0,0,0,0.05);
                 }
                 footer {
                   font-size: 18px;
+                  position:absolute;
+                   left:0px;
+                   bottom:10px;
+                   width:100%;
                 }
         </style>
 
@@ -32,25 +36,12 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="#"><i class="fa fa-home fa-3"></i></a>
+      <a class="navbar-brand" href="/"><i class="fa fa-home fa-3"></i></a>
     </div>
 
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-2">
       <ul class="nav navbar-nav">
         <li ><a href="/home"><span class="sr-only">(current)</span></a></li>
-        <!--li><a href="#">Link</a></li>
-        <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Dropdown <span class="caret"></span></a>
-          <ul class="dropdown-menu" role="menu">
-            <li><a href="#">Action</a></li>
-            <li><a href="#">Another action</a></li>
-            <li><a href="#">Something else here</a></li>
-            <li class="divider"></li>
-            <li><a href="#">Separated link</a></li>
-            <li class="divider"></li>
-            <li><a href="#">One more separated link</a></li>
-          </ul>
-        </li-->
       </ul>
       <form class="navbar-form navbar-right" role="search">
         <div class="form-group">
@@ -64,24 +55,18 @@
     </div>
   </div>
 </nav>
+               
                 <h1> Fire Notes </h1>
+                {% block content %}
 
-                <div class="jumbotron">
-                  <h4 align="center">Department</h4>
-                      
-                        <div align="center">
-                          {% for dept in x %}
-                            <a class="btn btn-primary btn-lg" href="/{{dept}}">{{dept}}</a>
-                          {% endfor %}
-                          
-                        </div>
-                 
-                </div>
+                {% endblock %}
+
                 <footer>
                  <div align="center">
-                    Made with &hearts; by Delta Force 
+                    Made with &hearts; by Delta Force
+                    <br>
+
                  </div>
-                  
                 </footer>
         </body>
 </html>

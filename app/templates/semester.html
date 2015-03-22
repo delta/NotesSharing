@@ -1,32 +1,17 @@
-<html>
-<head>
-        {% if title %}
-                <title> {{ title }} </title>
-        {% else %}
-                <title> Fire Notes </title>
-        {% endif %}
-</head>
-<style>
-        h1, h2 {
-                text-align : center ;
-        }
-</style>
+{% extends "base.html" %}
+{% block content %}
 
-<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
-        <body>        
-                <h2> Welcome to {{dept}} Department </h2>
+<div class="jumbotron" align="center">
                 
-                {% if semesters %}
-                <h3> Choose any one of the semesters </h3>
-                <ul>
-                {% for sem in semesters %}
-                        <li> <a href="/{{dept}}/{{sem}}">Semester {{sem}}</a></li>
-                {% endfor %}
-                </ul>
-                {% endif %}
+<h4> Welcome to {{dept}} ! </h4>
+<h5> Choose the semester:</h5>
+                  
+                    
+        {% for sem in semesters %}
+          <a class="btn btn-primary btn-lg" href="/{{dept}}/{{sem}}">Semester {{sem}}</a>
+        {% endfor %}
+                    
+</div>
 
-                {% block content %}
-                {% endblock %}
 
-        </body>
-</html>
+{% endblock %}

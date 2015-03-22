@@ -22,9 +22,10 @@ def allowed_file(filename):
 
 @app.route('/')
 @app.route('/index')
+@app.route('/home')
 def index():
     print list_departments
-    return render_template('base.html', title='FireNotes', x=list_departments)
+    return render_template('home.html', title='FireNotes', x=list_departments)
 
 
 @app.route('/<name>')
@@ -60,7 +61,7 @@ def UploadOrView(name, semester):
         return render_template('notes.html', list_of_files=list_of_files, dept=name, sem=semester)
 
 @app.route('/static/css/<filename>')
-def serveCSS(filename):
+def serveCss(filename):
     return send_file("static/css/"+filename)
 
 @app.route('/static/fonts/<filename>')
@@ -70,6 +71,10 @@ def serveFonts(filename):
 @app.route('/static/js/<filename>')
 def serveJs(filename):
     return send_file("static/js/"+filename)
+
+@app.route('/static/images/<filename>')
+def serveImages(filename):
+    return send_file("static/images/"+filename)
 
 @app.route('/<name>/<semester>/<filename>')
 def Download(name, semester, filename):
