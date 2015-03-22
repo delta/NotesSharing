@@ -2,18 +2,20 @@
 
 {% block content %}
 
+        {% if session['rollnumber'] %}
+        <h5> Upload Notes </h5>
+        <form action="" method=post enctype="multipart/form-data">
+                <input type=file class="form-control input-sm" name="pdf"></input>
+                <input type="submit" class="btn btn-primary" value="upload notes"></input>
+        </form>
+        {% endif %}
         <h4> Files </h4>
         {% for file in list_of_files %}
                 <div class= "well">
                         <h4>{{file[0]}} {{file[1]}} <a href="/{{dept}}/{{sem}}/{{file[1]}}">Download Babe</a></h4>
                 </div>
         {% endfor %}
-       
-        <h5> Upload Notes </h5>
-        <form action="" method=post enctype="multipart/form-data">
-                <input type=file class="form-control input-sm" name="pdf"></input>
-                <input type="submit" class="btn btn-primary" value="upload notes"></input>
-        </form>
+        
 
 {% endblock %}
                 
