@@ -3,7 +3,7 @@ import time
 from .. import flask
 
 IMAP_SERVER = 'webmail.nitt.edu'
-DEPARTMENTS = {6: 'CSE', 10: 'ICE', 12: 'META'}
+DEPARTMENTS = {6: 'CSE', 10: 'ICE', 12: 'META', 14:'PROD', 11:'MECH', 7:'EEE'}
 
 
 def process_username(username):
