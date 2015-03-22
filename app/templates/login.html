@@ -5,9 +5,15 @@
         <h1> Login  </h1>
         <form action= "" method="POST" name="login">
                 {{ form.hidden_tag() }}
-                <h4> Enter Department 
-                {{ form.department(size=20) }}
-                {% for error in form.department.errors %}
+                <h4> Enter roll number 
+                {{ form.rollnumber(size=9) }}
+                {% for error in form.rollnumber.errors %}
+                        <span style="color:red;">[ {{ error }} ]</span>
+                {% endfor %}
+                </h4>
+                <h4> Enter webmail password
+                {{ form.password(size=9) }}
+                {% for error in form.password.errors %}
                         <span style="color:red;">[ {{ error }} ]</span>
                 {% endfor %}
                 </h4>
