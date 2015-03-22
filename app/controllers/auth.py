@@ -38,9 +38,9 @@ def server_login(username, password):
     logged_in = imap_login(username, password)
     year, dept = parse_username(username)
     # Yet to test the session.
-    # flask.session['username'] = username
-    # flask.session['year'] = year
-    # flask.session['dept'] = dept
+    flask.session['rollnumber'] = username
+    flask.session['year'] = year
+    flask.session['dept'] = dept
     return logged_in, year, dept
 
 print server_login('106112091', 'sriramwebmail')
