@@ -48,18 +48,22 @@ def UploadOrView(name, semester):
         return render_template("notes.html", list_of_files=list_of_files, dept=name, sem=semester)
 
     elif request.method == 'POST':
-        file = request.files['pdf']
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        print ' okay we are uploading the file '
-        uploads = files(filename=filename, department=name, semester=semester)
-        db.session.add(uploads)
-        db.session.commit()
-        all_files = files.query.filter(or_(files.department.like(name),
-                                           files.semester.like(int(semester))))
-        list_of_files = [(file.id, file.filename) for file in all_files.all()]
-        return render_template('notes.html', list_of_files=list_of_files, dept=name, sem=semester)
+        if session['rollnumber'] and session['dept'] == name:
+            file = request.files['pdf']
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            print ' okay we are uploading the file '
+            uploads = files(filename=filename, department=name, semester=semester)
+            db.session.add(uploads)
+            db.session.commit()
+            all_files = files.query.filter(or_(files.department.like(name),
+                                               files.semester.like(int(semester))))
+            list_of_files = [(file.id, file.filename) for file in all_files.all()]
+            return render_template('notes.html', list_of_files=list_of_files, dept=name, sem=semester)
+        else:
+            return redirect(url_for('navigate'))
+
 
 @app.route('/static/css/<filename>')
 def serveCss(filename):
