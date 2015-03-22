@@ -6,6 +6,7 @@ from app import app, db  # Your init files
 from .forms import LoginForm
 from ..models import Department, files
 import os
+from .auth import server_login
 
 departments = Department.query.all()
 list_departments = []
@@ -91,14 +92,18 @@ def login():
         # Whether all parts of the form is submitted or not
         if form.validate_on_submit():
             flash(
-                'Login requested for Department = {0}'.format(form.department))
-            form.department = request.form['department']
-            if form.department in list_departments:
-                print 'yes'
+                'Login requested for Department = {0}'.format(form.rollnumber))
+            form.rollnumber = request.form['rollnumber']
+            print request.form['rollnumber']
+            #  print request.form['password']
+            valid_login = server_login(request.form['rollnumber'], request.form['password'])
+            print valid_login
+            if valid_login:
+                print 'Logged in'
                 return redirect(url_for('index'))
             else:
                 print 'fuck'
-                return render_template('login.html', title='Sign In', form=form)
+                return redirect(url_for('login'))
 
     elif request.method == 'GET':
         return render_template('login.html', title='Sign In', form=form)

@@ -34,13 +34,17 @@ def parse_username(username):
 def server_login(username, password):
     year = None
     dept = None
-    username = process_username(username)
-    logged_in = imap_login(username, password)
-    year, dept = parse_username(username)
-    # Yet to test the session.
-    # flask.session['username'] = username
-    # flask.session['year'] = year
-    # flask.session['dept'] = dept
-    return logged_in, year, dept
+    logged_in = False
+    try:
+        username = process_username(username)
+        logged_in = imap_login(username, password)
+        year, dept = parse_username(username)
+        # Yet to test the session.
+        flask.session['rollnumber'] = username
+        flask.session['year'] = year
+        flask.session['dept'] = dept
+    except:
+         logged_in = False
+    return logged_in
 
 print server_login('106112091', 'sriramwebmail')
