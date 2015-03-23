@@ -12,7 +12,6 @@ departments = Department.query.all()
 list_departments = []
 for dept in departments:
     list_departments.append(dept.department)
-
 semesters = [i for i in range(1, 9)]
 
 
