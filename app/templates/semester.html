@@ -2,14 +2,20 @@
 {% block content %}
 
 <div class="jumbotron" align="center">
-                
-<h4> Welcome to {{dept}} ! </h4>
-<br>                   
-        {% for sem in semesters %}
-          <a class="btn btn-primary btn-lg" href="/{{dept}}/{{sem}}">Semester {{sem}}</a>
-        {% endfor %}
-                    
+	
+	<h4> Welcome to {{dept}} ! </h4>
+	<br>                   
+	{% for sem in semesters %}
+	<a class="btn btn-primary btn-lg" href="/{{dept}}/{{sem}}">Semester {{sem}}</a>
+	{% endfor %}
+	
 </div>
+<footer>
+	<div align="center">
+		Made with &hearts; by Delta Force
+		<br>
 
+	</div>
+</footer>
 
 {% endblock %}
