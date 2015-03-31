@@ -71,13 +71,15 @@ def UploadOrView(name, semester):
 
     elif request.method == 'POST':
         if session['rollnumber'] and session['dept'] == name:
-            file = request.files['pdf']
-            if file and allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            uploads = files(filename=filename, department=name, semester=semester, author= request.form['author'], tags = request.form['tags'], description = request.form['description'],downloads = 0 , stars = 0, uploader = session['rollnumber'])
-            db.session.add(uploads)
-            db.session.commit()
+            uploaded_files = request.files.getlist('pdf')
+            print uploaded_files
+            for file in uploaded_files:
+                    if file and allowed_file(file.filename):
+                        filename = secure_filename(file.filename)
+                        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                    uploads = files(filename=filename, department=name, semester=semester, author= request.form['author'], tags = request.form['tags'], description = request.form['description'],downloads = 0 , stars = 0, uploader = session['rollnumber'])
+                    db.session.add(uploads)
+                    db.session.commit()
             all_files = files.query.filter(and_(files.department.like(name),
                                                files.semester.like(int(semester))))
             list_of_files = [(file.filename,file.author,file.tags,file.description,file.downloads,file.stars,file.uploader) for file in all_files.all()]
