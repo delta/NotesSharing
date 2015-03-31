@@ -70,6 +70,11 @@ def UploadOrView(name, semester):
         return render_template("notes.html", list_of_files=list_of_files, dept=name, sem=semester,form=form,search_form = Search())
 
     elif request.method == 'POST':
+        print request.form
+        if request.form.get('query'):
+            print 'hola'
+            return "done"
+              
         if session['rollnumber'] and session['dept'] == name:
             uploaded_files = request.files.getlist('pdf')
             print uploaded_files
