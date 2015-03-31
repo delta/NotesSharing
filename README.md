@@ -2,6 +2,17 @@
 
 Fire Notes is a notes sharing platform where students can upload, maintain versions and download notes.
 
+##To do 
+- [ ] Add apache solr for document search 
+- [ ] Add Star feature 
+- [x] Add Download Counter 
+- [x] Add Meta Data before uploading file
+- [x] Search files by metadata 
+- [ ] Add subjects of each semester to database 
+- [ ] Subjects Scraper 
+- [ ] Concatenate the files into a single pdf 
+- [ ] Upload multiple files at once 
+
 ##Features
 * Upload and download notes.
 * Anybody can download any version of the file.
