@@ -76,7 +76,6 @@ def UploadOrView(name, semester):
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            print ' okay we are uploading the file '
             uploads = files(filename=filename, department=name, semester=semester, author= request.form['author'], tags = request.form['tags'], description = request.form['description'],downloads = 0 , stars = 0, uploader = session['rollnumber'])
             db.session.add(uploads)
             db.session.commit()
@@ -120,10 +119,7 @@ def login():
     elif request.method == 'POST':
         # Whether all parts of the form is submitted or not
         if form.validate_on_submit():
-            flash('Login requested for Department = {0}'.format(form.rollnumber))
             form.rollnumber = request.form['rollnumber']
-            print request.form['rollnumber']
-            #  print request.form['password']
             valid_login = server_login(request.form['rollnumber'], request.form['password'])
             if not valid_login:
                 return redirect(url_for('login'))
@@ -133,8 +129,6 @@ def login():
                         new_entry = User(rollNo = request.form['rollnumber'])
                         db.session.add(new_entry)
                         db.session.commit()
-                        print 'new Entry added baby'
-                print 'Logged in'
                 return redirect(url_for('navigate', name=session['dept']))
     
     return render_template('login.html', title='Sign In', form=form,search_form = Search())
