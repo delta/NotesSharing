@@ -15,3 +15,7 @@ class MetaData(Form):
         author = StringField('Author of notes',validators=[DataRequired()])
         tags  = StringField('Enter tags',validators=[DataRequired()])  
         description = StringField('Enter description', validators =[DataRequired()])
+
+class Search(Form):
+        query = StringField('Search whatever you want')
+

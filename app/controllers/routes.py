@@ -3,7 +3,7 @@ from flask.ext.login import login_user, logout_user, current_user, login_require
 from werkzeug import secure_filename
 from sqlalchemy import or_, and_
 from app import app, db  # Your init files
-from .forms import LoginForm , MetaData 
+from .forms import LoginForm , MetaData , Search
 from ..models import Department, files,User
 import os
 from .auth import server_login
@@ -12,32 +12,55 @@ departments = Department.query.all()
 list_departments = []
 for dept in departments:
     list_departments.append(dept.department)
-semesters = [i for i in range(1, 9)]
 
+semesters = [i for i in range(1, 9)]
 
 def allowed_file(filename):
     return '.' in filename and \
         filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
 
 
-@app.route('/')
-@app.route('/index')
-@app.route('/home')
+@app.route('/',methods = ['GET','POST'])
+@app.route('/index', methods = ['GET','POST'])
+@app.route('/home', methods = ['GET','POST'])
 def index():
-    print list_departments
-    return render_template('home.html', title='FireNotes', x=list_departments)
+    #print form
+    if request.method == 'GET':
+        return render_template('home.html', title='FireNotes', x=list_departments,search_form = Search())
+    elif request.method == 'POST':
+        print 'this happened '
+        search = request.form['query'].split(' ')
+        print search
+        tags,author,description = search[0],search[1],search[2]
+        all_files = files.query.filter(or_(files.tags.like(tags),
+                files.author.like(author),files.description.like(description)))
+        list_of_files = [(file.filename,file.author,file.tags,file.description,file.downloads,file.stars,file.uploader) for file in all_files.all()]
+        return render_template('notes.html', 
+                        list_of_files=list_of_files,
+                        search_form = Search())
 
-
-@app.route('/<name>')
+@app.route('/<name>' , methods = ['GET','POST'])
 def navigate(name):
     # name is basically the department
-    return render_template('semester.html', dept=name, semesters=semesters)
-
+    if request.method == 'GET':
+        return render_template('semester.html', dept=name, semesters=semesters,search_form = Search())
+    elif request.method == 'POST':
+        print 'this happened '
+        search = request.form['query'].split(' ')
+        print search
+        tags,author,description = search[0],search[1],search[2]
+        all_files = files.query.filter(or_(files.tags.like(tags),
+                files.author.like(author),files.description.like(description)))
+        list_of_files = [(file.filename,file.author,file.tags,file.description,file.downloads,file.stars,file.uploader) for file in all_files.all()]
+        return render_template('notes.html', 
+                        list_of_files=list_of_files,
+                        search_form = Search())
 
 @app.route('/<name>/<semester>', methods=['GET', 'POST'])
 def UploadOrView(name, semester):
     
     form = MetaData() 
+    search_form = Search() 
     if request.method == 'GET':
         '''
                 Get all the files from the db and display to the user
@@ -45,7 +68,7 @@ def UploadOrView(name, semester):
         all_files = files.query.filter(and_(files.department.like(name),
                                             files.semester.like(int(semester))))
         list_of_files = [(file.filename,file.author,file.tags,file.description,file.downloads,file.stars,file.uploader) for file in all_files.all()]
-        return render_template("notes.html", list_of_files=list_of_files, dept=name, sem=semester,form=form)
+        return render_template("notes.html", list_of_files=list_of_files, dept=name, sem=semester,form=form,search_form = Search())
 
     elif request.method == 'POST':
         if session['rollnumber'] and session['dept'] == name:
@@ -60,7 +83,7 @@ def UploadOrView(name, semester):
             all_files = files.query.filter(and_(files.department.like(name),
                                                files.semester.like(int(semester))))
             list_of_files = [(file.filename,file.author,file.tags,file.description,file.downloads,file.stars,file.uploader) for file in all_files.all()]
-            return render_template('notes.html', list_of_files=list_of_files, dept=name, sem=semester,form=form)
+            return render_template('notes.html', list_of_files=list_of_files, dept=name, sem=semester,form=form,search_form = Search())
         else:
             return redirect(url_for('navigate'))
 
@@ -90,9 +113,10 @@ def Download(name, semester, filename):
 @app.route('/login', methods=['GET', 'POST'])
 def login():
 
+    search_form = Search()
     form = LoginForm()
     if request.method == 'GET':
-        return render_template('login.html', title='Sign In', form=form)
+        return render_template('login.html', title='Sign In', form=form,search_form = Search())
     elif request.method == 'POST':
         # Whether all parts of the form is submitted or not
         if form.validate_on_submit():
@@ -104,9 +128,6 @@ def login():
             if not valid_login:
                 return redirect(url_for('login'))
             else:
-                # check if the rollnumber exist in the user database 
-                # if it doesnt then add it to the db 
-                # else redirect to index 
                 user = User.query.filter_by(rollNo = request.form['rollnumber']).all()
                 if not len(user):
                         new_entry = User(rollNo = request.form['rollnumber'])
@@ -116,7 +137,7 @@ def login():
                 print 'Logged in'
                 return redirect(url_for('navigate', name=session['dept']))
     
-    return render_template('login.html', title='Sign In', form=form)
+    return render_template('login.html', title='Sign In', form=form,search_form = Search())
 
 
 @app.route('/logout', methods=['GET', 'POST'])

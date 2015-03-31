@@ -4,7 +4,7 @@ class Config(object):
         basedir = os.path.abspath(os.path.dirname(__file__))
         WTF_CSRF_ENABLED = True
         UPLOAD_FOLDER = basedir + '/../tmp'
-        ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpe    g', 'gif'])
+        ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif','odp','pptx','docx'])
         IMAP_SERVER = 'webmail.nitt.edu'
         IMAP_SERVER_PORT = '143'
 
