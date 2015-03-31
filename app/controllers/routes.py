@@ -44,7 +44,7 @@ def UploadOrView(name, semester):
         '''
         all_files = files.query.filter(and_(files.department.like(name),
                                             files.semester.like(int(semester))))
-        list_of_files = [(file.id, file.filename) for file in all_files.all()]
+        list_of_files = [(file.filename,file.author,file.tags,file.description,file.downloads,file.stars,file.uploader) for file in all_files.all()]
         return render_template("notes.html", list_of_files=list_of_files, dept=name, sem=semester,form=form)
 
     elif request.method == 'POST':
@@ -54,12 +54,12 @@ def UploadOrView(name, semester):
                 filename = secure_filename(file.filename)
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             print ' okay we are uploading the file '
-            uploads = files(filename=filename, department=name, semester=semester)
+            uploads = files(filename=filename, department=name, semester=semester, author= request.form['author'], tags = request.form['tags'], description = request.form['description'],downloads = 0 , stars = 0, uploader = session['rollnumber'])
             db.session.add(uploads)
             db.session.commit()
             all_files = files.query.filter(and_(files.department.like(name),
                                                files.semester.like(int(semester))))
-            list_of_files = [(file.id, file.filename) for file in all_files.all()]
+            list_of_files = [(file.filename,file.author,file.tags,file.description,file.downloads,file.stars,file.uploader) for file in all_files.all()]
             return render_template('notes.html', list_of_files=list_of_files, dept=name, sem=semester,form=form)
         else:
             return redirect(url_for('navigate'))
@@ -84,7 +84,6 @@ def serveImages(filename):
 @app.route('/<name>/<semester>/<filename>')
 def Download(name, semester, filename):
     download_file = filename
-    print 'Oh yeah we are gonna download the file'
     return send_file("../tmp/" + download_file, attachment_filename=download_file, as_attachment=True)
 
 
@@ -92,10 +91,8 @@ def Download(name, semester, filename):
 def login():
 
     form = LoginForm()
-
     if request.method == 'GET':
         return render_template('login.html', title='Sign In', form=form)
-
     elif request.method == 'POST':
         # Whether all parts of the form is submitted or not
         if form.validate_on_submit():
@@ -104,9 +101,7 @@ def login():
             print request.form['rollnumber']
             #  print request.form['password']
             valid_login = server_login(request.form['rollnumber'], request.form['password'])
-            print valid_login
             if not valid_login:
-                print 'fuck'
                 return redirect(url_for('login'))
             else:
                 # check if the rollnumber exist in the user database 
