@@ -12,7 +12,6 @@ departments = Department.query.all()
 list_departments = []
 for dept in departments:
     list_departments.append(dept.department)
-
 semesters = [i for i in range(1, 9)]
 
 def allowed_file(filename):
@@ -106,6 +105,9 @@ def serveImages(filename):
 @app.route('/<name>/<semester>/<filename>')
 def Download(name, semester, filename):
     download_file = filename
+    updated_file = files.query.filter_by(filename = filename).first()
+    updated_file.downloads += 1
+    db.session.commit()
     return send_file("../tmp/" + download_file, attachment_filename=download_file, as_attachment=True)
 
 
