@@ -10,9 +10,16 @@
 	<div style="width:30%; margin:0 auto;">
 		<h5>  </h5>
 		<form action="" method=post enctype="multipart/form-data">
+                        {{ form.hidden_tag() }}
+                        {{ message }}
+                        <div>
+                                {{ form.author(size=20,class="form-control",placeholder="Enter author") }}
+                                {{ form.tags(size=20,class="form-control", placeholder = "CT1,CT2,SEM")}}
+                                {{ form.description(size=100,class="form-control",placeholder="Description of subject") }}
 			<input type="file" class="btn btn-danger" name="pdf"></input>
 			<br>
 			<input type="submit" class="btn btn-primary" value="upload notes"></input>
+                </div>
 		</form>
 	</div>
 	{% endif %}

@@ -3,7 +3,7 @@ from flask.ext.login import login_user, logout_user, current_user, login_require
 from werkzeug import secure_filename
 from sqlalchemy import or_, and_
 from app import app, db  # Your init files
-from .forms import LoginForm
+from .forms import LoginForm , MetaData 
 from ..models import Department, files,User
 import os
 from .auth import server_login
@@ -36,7 +36,8 @@ def navigate(name):
 
 @app.route('/<name>/<semester>', methods=['GET', 'POST'])
 def UploadOrView(name, semester):
-
+    
+    form = MetaData() 
     if request.method == 'GET':
         '''
                 Get all the files from the db and display to the user
@@ -44,7 +45,7 @@ def UploadOrView(name, semester):
         all_files = files.query.filter(and_(files.department.like(name),
                                             files.semester.like(int(semester))))
         list_of_files = [(file.id, file.filename) for file in all_files.all()]
-        return render_template("notes.html", list_of_files=list_of_files, dept=name, sem=semester)
+        return render_template("notes.html", list_of_files=list_of_files, dept=name, sem=semester,form=form)
 
     elif request.method == 'POST':
         if session['rollnumber'] and session['dept'] == name:
@@ -56,10 +57,10 @@ def UploadOrView(name, semester):
             uploads = files(filename=filename, department=name, semester=semester)
             db.session.add(uploads)
             db.session.commit()
-            all_files = files.query.filter(or_(files.department.like(name),
+            all_files = files.query.filter(and_(files.department.like(name),
                                                files.semester.like(int(semester))))
             list_of_files = [(file.id, file.filename) for file in all_files.all()]
-            return render_template('notes.html', list_of_files=list_of_files, dept=name, sem=semester)
+            return render_template('notes.html', list_of_files=list_of_files, dept=name, sem=semester,form=form)
         else:
             return redirect(url_for('navigate'))
 
