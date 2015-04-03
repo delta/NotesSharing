@@ -147,3 +147,36 @@ def login():
 def logout():
     session.clear()
     return redirect(url_for('login'))
+
+@app.route('/<name>/<semester>/upload', methods=['GET', 'POST'])
+def Upload(name, semester):
+    
+    form = MetaData() 
+    search_form = Search() 
+    if request.method == 'GET':
+       return render_template("upload.html",dept=name, sem=semester,form=form,search_form = Search())
+
+    elif request.method == 'POST':
+        print request.form
+        if request.form.get('query'):
+            print 'hola'
+            return "done"
+              
+        if session['rollnumber'] and session['dept'] == name:
+            uploaded_files = request.files.getlist('pdf')
+            print uploaded_files
+            for file in uploaded_files:
+                    if file and allowed_file(file.filename):
+                        filename = secure_filename(file.filename)
+                        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                    uploads = files(filename=filename, department=name, semester=semester, author= request.form['author'], tags = request.form['tags'], description = request.form['description'],downloads = 0 , stars = 0, uploader = session['rollnumber'])
+                    db.session.add(uploads)
+                    db.session.commit()
+            all_files = files.query.filter(and_(files.department.like(name),
+                                               files.semester.like(int(semester))))
+            list_of_files = [(file.filename,file.author,file.tags,file.description,file.downloads,file.stars,file.uploader) for file in all_files.all()]
+            #return render_template('notes.html', list_of_files=list_of_files, dept=name, sem=semester,form=form,search_form = Search())
+            redirect(url_for('Download'), list_of_files=list_of_files, dept=name, sem=semester,form=form,search_form = Search())
+        else:
+            return redirect(url_for('navigate'))
+

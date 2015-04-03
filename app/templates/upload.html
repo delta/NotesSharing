@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="jumbotron" align="center">
+	
+	<div style="width:30%; margin:0 auto;">
+		<h4>Upload Notes, Books et al.</h4>
+{% if session['rollnumber'] and session['dept']==dept %}
+	
+		<form action="" method=post enctype="multipart/form-data">
+			{{ form.hidden_tag() }}
+			{{ message }}
+			<div>
+				{{ form.author(size=20,class="form-control",placeholder="Enter author") }}
+				{{ form.tags(size=20,class="form-control", placeholder = "CT1,CT2,SEM")}}
+				{{ form.description(size=100,class="form-control",placeholder="Description of subject") }}
+				<div style='height: 0px;width: 0px; overflow:hidden;'>
+					<input type="file" class="btn btn-danger" id="upfile" name="pdf" multiple="" onchange="sub(this)" />
+				</div>
+				<br>
+				<input type="button" class="btn btn-primary" value="Choose File" onclick="getFile()" />
+				<input type="submit" class="btn btn-primary btn-success" value="upload"></input>
+				<br>
+
+
+			</div>
+		</form>
+	</div>
+	<footer>
+
+		<div class="footy">
+			<div align="center">
+				Made with &hearts; by Delta Force
+				<br>
+
+			</div>
+		</div>
+{%else%}
+Sorry mate, you can upload only for your department :/
+{% endif %}
+{% endblock %}
