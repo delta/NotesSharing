@@ -70,7 +70,11 @@
 					{{file[6]}} 
 				</td>
 				<td>
+                                        {% if dept %}
 					<a class="btn btn-success" href="/{{dept}}/{{sem}}/{{file[0]}}">Download</a>
+                                        {% else %}
+                                        <a class="btn" href="/filename/{{file[0]}}">Download</a>
+                                        {% endif %}
 				</td>
 
 			</tr>

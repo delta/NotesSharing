@@ -79,12 +79,13 @@ def UploadOrView(name, semester):
             uploaded_files = request.files.getlist('pdf')
             print uploaded_files
             for file in uploaded_files:
-                    if file and allowed_file(file.filename):
-                        filename = secure_filename(file.filename)
-                        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                    uploads = files(filename=filename, department=name, semester=semester, author= request.form['author'], tags = request.form['tags'], description = request.form['description'],downloads = 0 , stars = 0, uploader = session['rollnumber'])
-                    db.session.add(uploads)
-                    db.session.commit()
+                if file and allowed_file(file.filename):
+                    print 'fuck yeah'
+                    filename = secure_filename(file.filename)
+                    file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                uploads = files(filename=filename, department=name, semester=semester, author= request.form['author'], tags = request.form['tags'], description = request.form['description'],downloads = 0 , stars = 0, uploader = session['rollnumber'])
+                db.session.add(uploads)
+                db.session.commit()
             all_files = files.query.filter(and_(files.department.like(name),
                                                files.semester.like(int(semester))))
             list_of_files = [(file.filename,file.author,file.tags,file.description,file.downloads,file.stars,file.uploader) for file in all_files.all()]
@@ -116,6 +117,13 @@ def Download(name, semester, filename):
     updated_file.downloads += 1
     db.session.commit()
     return send_file("../tmp/" + download_file, attachment_filename=download_file, as_attachment=True)
+
+@app.route('/filename/<filename>')
+def FastDownload(filename):
+    updated_file = files.query.filter_by(filename = filename).first()
+    updated_file.downloads += 1
+    db.session.commit()
+    return send_file("../tmp/" + filename, attachment_filename=filename, as_attachment=True)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -175,8 +183,8 @@ def Upload(name, semester):
             all_files = files.query.filter(and_(files.department.like(name),
                                                files.semester.like(int(semester))))
             list_of_files = [(file.filename,file.author,file.tags,file.description,file.downloads,file.stars,file.uploader) for file in all_files.all()]
-            #return render_template('notes.html', list_of_files=list_of_files, dept=name, sem=semester,form=form,search_form = Search())
-            redirect(url_for('Download'), list_of_files=list_of_files, dept=name, sem=semester,form=form,search_form = Search())
+            return render_template('notes.html', list_of_files=list_of_files, dept=name, sem=semester,form=form,search_form = Search())
+            #redirect(url_for('Download'), list_of_files=list_of_files, dept=name, sem=semester,form=form,search_form = Search())
         else:
             return redirect(url_for('navigate'))
 
