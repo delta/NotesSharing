@@ -119,7 +119,7 @@ def Download(name, semester, filename):
     return send_file("../tmp/" + download_file, attachment_filename=download_file, as_attachment=True)
 
 @app.route('/filename/<filename>')
-def FastDownload(filename):
+def fastdownload(filename):
     updated_file = files.query.filter_by(filename = filename).first()
     updated_file.downloads += 1
     db.session.commit()
