@@ -8,12 +8,12 @@ from ..models import Department, files,User
 import os
 from .auth import server_login
 
+
 departments = Department.query.all()
 list_departments = []
 for dept in departments:
     list_departments.append(dept.department)
 semesters = [i for i in range(1, 9)]
-
 def allowed_file(filename):
     return '.' in filename and \
         filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
@@ -44,9 +44,8 @@ def navigate(name):
     if request.method == 'GET':
         return render_template('semester.html', dept=name, semesters=semesters,search_form = Search())
     elif request.method == 'POST':
-        print 'this happened '
+
         search = request.form['query'].split(' ')
-        print search
         tags,author,description = search[0],search[1],search[2]
         all_files = files.query.filter(or_(files.tags.like(tags),
                 files.author.like(author),files.description.like(description)))
@@ -54,7 +53,6 @@ def navigate(name):
         return render_template('notes.html', 
                         list_of_files=list_of_files,
                         search_form = Search())
-
 @app.route('/<name>/<semester>', methods=['GET', 'POST'])
 def UploadOrView(name, semester):
     
@@ -71,10 +69,14 @@ def UploadOrView(name, semester):
 
     elif request.method == 'POST':
         print request.form
-        if request.form.get('query'):
-            print 'hola'
-            return "done"
-              
+        if request.form.get('query'):  
+            search = request.form['query'].split(' ')
+            tags,author,description = search[0],search[1],search[2]
+            all_files = files.query.filter(or_(files.tags.like(tags),files.author.like(author),files.description.like(description)))
+            list_of_files = [(file.filename,file.author,file.tags,file.description,file.downloads,file.stars,file.uploader) for file in all_files.all()]
+            return render_template('notes.html', 
+                        list_of_files=list_of_files,
+                        search_form = Search())
         if session['rollnumber'] and session['dept'] == name:
             uploaded_files = request.files.getlist('pdf')
             print uploaded_files
@@ -167,8 +169,13 @@ def Upload(name, semester):
     elif request.method == 'POST':
         print request.form
         if request.form.get('query'):
-            print 'hola'
-            return "done"
+            search = request.form['query'].split(' ')
+            tags,author,description = search[0],search[1],search[2]
+            all_files = files.query.filter(or_(files.tags.like(tags),files.author.like(author),files.description.like(description)))
+            list_of_files = [(file.filename,file.author,file.tags,file.description,file.downloads,file.stars,file.uploader) for file in all_files.all()]
+            return render_template('notes.html', 
+                        list_of_files=list_of_files,
+                        search_form = Search())
               
         if session['rollnumber'] and session['dept'] == name:
             uploaded_files = request.files.getlist('pdf')
@@ -184,7 +191,6 @@ def Upload(name, semester):
                                                files.semester.like(int(semester))))
             list_of_files = [(file.filename,file.author,file.tags,file.description,file.downloads,file.stars,file.uploader) for file in all_files.all()]
             return render_template('notes.html', list_of_files=list_of_files, dept=name, sem=semester,form=form,search_form = Search())
-            #redirect(url_for('Download'), list_of_files=list_of_files, dept=name, sem=semester,form=form,search_form = Search())
         else:
             return redirect(url_for('navigate'))
 
