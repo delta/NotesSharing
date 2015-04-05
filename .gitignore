@@ -1,5 +1,5 @@
 migrations/
-
+/whoosh_index
 /search.db
 *.pyc
 *.db*
