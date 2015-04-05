@@ -1,5 +1,6 @@
 migrations/
 
+/search.db
 *.pyc
 *.db*
 /db_repository

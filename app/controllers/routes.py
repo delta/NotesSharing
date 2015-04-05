@@ -8,7 +8,6 @@ from ..models import Department, files,User
 import os
 from .auth import server_login
 
-
 departments = Department.query.all()
 list_departments = []
 for dept in departments:
@@ -28,12 +27,9 @@ def index():
         return render_template('home.html', title='FireNotes', x=list_departments,search_form = Search())
     elif request.method == 'POST':
         print 'this happened '
-        search = request.form['query'].split(' ')
-        print search
-        tags,author,description = search[0],search[1],search[2]
-        all_files = files.query.filter(or_(files.tags.like(tags),
-                files.author.like(author),files.description.like(description)))
-        list_of_files = [(file.filename,file.author,file.tags,file.description,file.downloads,file.stars,file.uploader) for file in all_files.all()]
+        query = request.form['query']
+        indexed_search = files.query.whoosh_search(query)
+        list_of_files = [(file.filename,file.author,file.tags,file.description,file.downloads,file.stars,file.uploader) for file in indexed_search]
         return render_template('notes.html', 
                         list_of_files=list_of_files,
                         search_form = Search())
@@ -44,12 +40,10 @@ def navigate(name):
     if request.method == 'GET':
         return render_template('semester.html', dept=name, semesters=semesters,search_form = Search())
     elif request.method == 'POST':
+        query = request.form['query']
+        indexed_search = files.query.whoosh_search(query)
+        list_of_files = [(file.filename,file.author,file.tags,file.description,file.downloads,file.stars,file.uploader) for file in indexed_search]
 
-        search = request.form['query'].split(' ')
-        tags,author,description = search[0],search[1],search[2]
-        all_files = files.query.filter(or_(files.tags.like(tags),
-                files.author.like(author),files.description.like(description)))
-        list_of_files = [(file.filename,file.author,file.tags,file.description,file.downloads,file.stars,file.uploader) for file in all_files.all()]
         return render_template('notes.html', 
                         list_of_files=list_of_files,
                         search_form = Search())
@@ -70,10 +64,9 @@ def UploadOrView(name, semester):
     elif request.method == 'POST':
         print request.form
         if request.form.get('query'):  
-            search = request.form['query'].split(' ')
-            tags,author,description = search[0],search[1],search[2]
-            all_files = files.query.filter(or_(files.tags.like(tags),files.author.like(author),files.description.like(description)))
-            list_of_files = [(file.filename,file.author,file.tags,file.description,file.downloads,file.stars,file.uploader) for file in all_files.all()]
+            query = request.form['query']
+            indexed_search = files.query.whoosh_search(query)
+            list_of_files = [(file.filename,file.author,file.tags,file.description,file.downloads,file.stars,file.uploader) for file in indexed_search]
             return render_template('notes.html', 
                         list_of_files=list_of_files,
                         search_form = Search())
@@ -169,10 +162,9 @@ def Upload(name, semester):
     elif request.method == 'POST':
         print request.form
         if request.form.get('query'):
-            search = request.form['query'].split(' ')
-            tags,author,description = search[0],search[1],search[2]
-            all_files = files.query.filter(or_(files.tags.like(tags),files.author.like(author),files.description.like(description)))
-            list_of_files = [(file.filename,file.author,file.tags,file.description,file.downloads,file.stars,file.uploader) for file in all_files.all()]
+            query = request.form['query']
+            indexed_search = files.query.whoosh_search(query)
+            list_of_files = [(file.filename,file.author,file.tags,file.description,file.downloads,file.stars,file.uploader) for file in indexed_search]
             return render_template('notes.html', 
                         list_of_files=list_of_files,
                         search_form = Search())
