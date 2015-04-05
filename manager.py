@@ -27,5 +27,5 @@ def delete_db():
 @manager.command
 def upgrade_db():
         pass
-
+        
 manager.run()
