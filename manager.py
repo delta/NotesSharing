@@ -12,7 +12,7 @@ manager.add_command('shell',Shell())
 @manager.command
 def create_db():
         db.create_all()
-        depts = ['CSE', 'ECE', 'MECH', 'PROD', 'ICE', 'META', 'CIVIL', 'ARCHI', 'CHEM']
+        depts = ['CSE', 'EEE', 'ECE', 'MECH', 'PROD', 'ICE', 'META', 'CIVIL', 'ARCHI', 'CHEM']
         for dept in depts :
                 entry = models.Department(department = dept)
                 db.session.add(entry)
