@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from flask.ext.script import Manager , Shell, Server
 from flask.ext.migrate import Migrate, MigrateCommand
-from app import app,db,models
+from app import app, db, models
 
 migrate = Migrate(app, db)
 

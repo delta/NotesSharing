@@ -32,7 +32,13 @@ class files(db.Model):
     tags = db.Column(db.String(64) , index= True) 
     description = db.Column(db.String(100) , index= True)
     downloads = db.Column(db.Integer , index = True)
-    stars  = db.Column(db.Integer, index = True) 
     uploader = db.Column(db.String(64)  , index = True)
     def __repr__(self):
         return '<File {0}-> {1} >'.format(self.filename, self.department)
+
+
+class stars(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    file_id = db.Column(db.Integer)
+    uploader = db.Column(db.String(64)  , index = True)
+
