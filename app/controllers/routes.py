@@ -15,6 +15,7 @@ list_departments = []
 for dept in departments:
     list_departments.append(dept.department)
 semesters = [i for i in range(1, 9)]
+
 def allowed_file(filename):
     return '.' in filename and \
         filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
@@ -38,7 +39,7 @@ def index():
                 has_starred = stars.has_starred(file.id, session['rollnumber'])
             except:
                 pass
-            list_of_filesa.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader))
+            list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader))
         return render_template('notes.html', 
                         list_of_files=list_of_files,
                         search_form = Search())
@@ -54,7 +55,7 @@ def navigate(name):
         if request.form['star']:  # Adding star
             print "HAHAHA\n\n\n\n\n"
             stars.add_star(request.form['file_id'], request.form['user_rno'])
-            return "1"
+            return "JACKASS"
 
         query = request.form['query']
         indexed_search = files.query.whoosh_search(query)
@@ -65,7 +66,7 @@ def navigate(name):
                 has_starred = stars.has_starred(file.id, session['rollnumber'])
             except:
                 pass
-            list_of_filesa.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader))
+            list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader))
 
         return render_template('notes.html', 
                         list_of_files=list_of_files,
@@ -109,7 +110,7 @@ def UploadOrView(name, semester):
                     has_starred = stars.has_starred(file.id, session['rollnumber'])
                 except:
                     pass
-                list_of_filesa.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader))
+                list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader))
             return render_template('notes.html', 
                         list_of_files=list_of_files,
                         search_form = Search())
@@ -227,7 +228,7 @@ def Upload(name, semester):
                     has_starred = stars.has_starred(file.id, session['rollnumber'])
                 except:
                     pass
-                list_of_filesa.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader))
+                list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader))
             return render_template('notes.html', 
                         list_of_files=list_of_files,
                         search_form = Search())
