@@ -8,6 +8,7 @@ from ..models import Department, files,User
 import os
 from .auth import server_login
 
+
 departments = Department.query.all()
 list_departments = []
 for dept in departments:
