@@ -40,5 +40,5 @@ class files(db.Model):
 class stars(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     file_id = db.Column(db.Integer)
-    uploader = db.Column(db.String(64)  , index = True)
+    starrer = db.Column(db.String(64)  , index = True)
 
