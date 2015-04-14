@@ -252,7 +252,7 @@ def Upload(name, semester):
                 except:
                     pass
                 list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader))
-            return render_template('notes.html', list_of_files=list_of_files, dept=name, sem=semester,form=form,search_form = Search())
+            return redirect(url_for('UploadOrView',name=name, semester=semester) )
         else:
             return redirect(url_for('navigate'))
 
