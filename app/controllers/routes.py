@@ -9,7 +9,6 @@ import os
 from .auth import server_login
 import stars
 
-
 departments = Department.query.all()
 list_departments = []
 for dept in departments:
