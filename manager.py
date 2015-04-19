@@ -6,7 +6,7 @@ from app import app, db, models
 migrate = Migrate(app, db)
 
 manager = Manager(app)
-manager.add_command('runserver',Server(port=5000))
+manager.add_command('runserver',Server(host='0.0.0.0',port=5000))
 manager.add_command('shell',Shell())
 
 @manager.command

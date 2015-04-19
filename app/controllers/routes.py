@@ -2,13 +2,14 @@ from flask import render_template, flash, redirect, request, session, url_for, g
 from flask.ext.login import login_user, logout_user, current_user, login_required
 from werkzeug import secure_filename
 from sqlalchemy import or_, and_
-from app import app, db  # Your init files
+from app import app, db
 from .forms import LoginForm , MetaData , Search
 from ..models import Department, files,User
-import os
 from .auth import server_login
+import indexer
 import stars
-
+import os
+import pprint
 
 departments = Department.query.all()
 list_departments = []
@@ -19,6 +20,33 @@ semesters = [i for i in range(1, 9)]
 def allowed_file(filename):
     return '.' in filename and \
         filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
+
+def alfred(query):
+        has_starred = False
+        list_of_files = []
+
+        books = indexer.search(query)
+        print books
+        all_files = files.query.filter(files.filename.like(books))
+        for file in all_files:
+            list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader))
+        try:
+            has_starred = stars.has_starred(file.id, session['rollnumber'])
+        except:
+            pass
+
+        indexed_search = files.query.whoosh_search(query)
+        has_starred = False
+
+        for file in indexed_search:
+            try:
+                has_starred = stars.has_starred(file.id, session['rollnumber'])
+            except:
+                pass
+        list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader))
+
+                
+        return list_of_files
 
 
 @app.route('/',methods = ['GET','POST'])
@@ -31,18 +59,11 @@ def index():
     elif request.method == 'POST':
         print 'this happened '
         query = request.form['query']
-        indexed_search = files.query.whoosh_search(query)
-        has_starred = False
-        list_of_files = []
-        for file in indexed_search:
-            try:
-                has_starred = stars.has_starred(file.id, session['rollnumber'])
-            except:
-                pass
-            list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader))
+        list_of_files = alfred(query)
+
         return render_template('notes.html', 
-                        list_of_files=list_of_files,
-                        search_form = Search())
+                           list_of_files=list_of_files,
+                           search_form = Search())
 
 
 @app.route('/<name>/' , methods = ['GET','POST'])
@@ -52,25 +73,17 @@ def navigate(name):
     if request.method == 'GET':
         return render_template('semester.html', dept=name, semesters=semesters,search_form = Search())
     elif request.method == 'POST':
-        if request.form['star']:  # Adding star
+        result = request.form.get("star")
+        print result
+        if result:  # Adding star
             print "HAHAHA\n\n\n\n\n"
             stars.add_star(request.form['file_id'], request.form['user_rno'])
-            return "JACKASS"
-
         query = request.form['query']
-        indexed_search = files.query.whoosh_search(query)
-        has_starred = False
-        list_of_files = []
-        for file in indexed_search:
-            try:
-                has_starred = stars.has_starred(file.id, session['rollnumber'])
-            except:
-                pass
-            list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader))
+        list_of_files = alfred(query)    
 
         return render_template('notes.html', 
-                        list_of_files=list_of_files,
-                        search_form = Search())
+                            list_of_files=list_of_files,
+                            search_form = Search())
 
 
 @app.route('/<name>/<semester>', methods=['GET', 'POST'])
@@ -96,21 +109,17 @@ def UploadOrView(name, semester):
 
     elif request.method == 'POST':
         print request.form
-        if request.form['star']:  # Adding star
-            print "LALALAL\n\n\n\n\n"
-            stars.add_star(request.form['file_id'], request.form['user_rno'])
-            return "1111"
+        try:
+            if request.form['star']:  # Adding star                                                                                                        
+                print "LALALAL\n\n\n\n\n"
+                stars.add_star(request.form['file_id'], request.form['user_rno'])
+                return "1111"
+        except:
+            pass
         if request.form.get('query'):  
             query = request.form['query']
-            indexed_search = files.query.whoosh_search(query)
-            has_starred = False
-            list_of_files = []
-            for file in indexed_search:
-                try:
-                    has_starred = stars.has_starred(file.id, session['rollnumber'])
-                except:
-                    pass
-                list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader))
+            list_of_files = alfred(query)
+
             return render_template('notes.html', 
                         list_of_files=list_of_files,
                         search_form = Search())
@@ -220,15 +229,8 @@ def Upload(name, semester):
         print request.form
         if request.form.get('query'):
             query = request.form['query']
-            indexed_search = files.query.whoosh_search(query)
-            has_starred = False
-            list_of_files = []
-            for file in indexed_search:
-                try:
-                    has_starred = stars.has_starred(file.id, session['rollnumber'])
-                except:
-                    pass
-                list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader))
+            list_of_files = alfred(query)
+
             return render_template('notes.html', 
                         list_of_files=list_of_files,
                         search_form = Search())
@@ -253,6 +255,8 @@ def Upload(name, semester):
                 except:
                     pass
                 list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader))
+            # indexing code
+            indexer.index_it()
             return redirect(url_for('UploadOrView',name=name, semester=semester) )
         else:
             return redirect(url_for('navigate'))
