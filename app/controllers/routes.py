@@ -8,13 +8,13 @@ from ..models import Department, files,User
 import os
 from .auth import server_login
 import stars
+import json 
 
 departments = Department.query.all()
 list_departments = []
 for dept in departments:
     list_departments.append(dept.department)
 semesters = [i for i in range(1, 9)]
-
 def allowed_file(filename):
     return '.' in filename and \
         filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
@@ -44,6 +44,21 @@ def index():
                         search_form = Search())
 
 
+
+@app.route('/show/<files>',methods = ['GET','POST'])
+@app.route('/show/<files>/',methods = ['GET','POST'])
+def shownotes(files):
+    if request.method == 'GET':
+        print 'I ARRIVED HERE '
+        print files
+        return render_template('notes.html',list_of_files = json.loads(files) , search_form = Search())
+    
+    elif request.method == 'POST':
+        if request.form.get('star'):
+            print 'AHAHHA'
+            stars.add_star(request.form['file_id'], request.form['user_rno'])
+            return 'JACKASS'
+    
 @app.route('/<name>/' , methods = ['GET','POST'])
 @app.route('/<name>' , methods = ['GET','POST'])
 def navigate(name):
@@ -51,25 +66,28 @@ def navigate(name):
     if request.method == 'GET':
         return render_template('semester.html', dept=name, semesters=semesters,search_form = Search())
     elif request.method == 'POST':
-        if request.form['star']:  # Adding star
+
+        if request.form.get('star'):  # Adding star
             print "HAHAHA\n\n\n\n\n"
             stars.add_star(request.form['file_id'], request.form['user_rno'])
             return "JACKASS"
+        
+        if request.form.get('query'):
+            query = request.form['query']
+            indexed_search = files.query.whoosh_search(query)
+            has_starred = False
+            list_of_files = []
+            for file in indexed_search:
+                try:
+                    has_starred = stars.has_starred(file.id, session['rollnumber'])
+                except:
+                    pass
+                list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader))
 
-        query = request.form['query']
-        indexed_search = files.query.whoosh_search(query)
-        has_starred = False
-        list_of_files = []
-        for file in indexed_search:
-            try:
-                has_starred = stars.has_starred(file.id, session['rollnumber'])
-            except:
-                pass
-            list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader))
-
-        return render_template('notes.html', 
-                        list_of_files=list_of_files,
-                        search_form = Search())
+            #return redirect(url_for('shownotes',files = json.dumps(list_of_files)))
+            return render_template('notes.html', 
+                                list_of_files=list_of_files,
+                                search_form = Search())
 
 
 @app.route('/<name>/<semester>', methods=['GET', 'POST'])
@@ -94,8 +112,7 @@ def UploadOrView(name, semester):
         return render_template("notes.html", list_of_files=list_of_files, dept=name, sem=semester,form=form,search_form = Search())
 
     elif request.method == 'POST':
-        print request.form
-        if request.form['star']:  # Adding star
+        if request.form.get('star'):  # Adding star
             print "LALALAL\n\n\n\n\n"
             stars.add_star(request.form['file_id'], request.form['user_rno'])
             return "1111"

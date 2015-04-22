@@ -21,7 +21,6 @@ def create_db():
                 db.session.add(entry)
                 db.session.commit()
 
-manager.add_command('db', MigrateCommand)
 
 @manager.command
 def delete_db():

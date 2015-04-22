@@ -63,7 +63,7 @@
 				<th>File Name</th>
 				<th>Author</th>
 				<th>Tags</th>
-				<th>Descripton</th>
+				<th>Subject/Descripton</th>
 				<th>Downloads</th>
 				<th>Stars</th>
 				<th>Owner</th>
@@ -89,7 +89,7 @@
 					{{file[4]}} 
 				</td>
 				<td>
-					{% if (not file[5][0])  and session['rollnumber'] and session['dept']==dept %}
+                                        {% if (not file[5][0])  and session['rollnumber'] %} <!--and session['dept']==dept %}-->
 					<div id="starlink">
 						<a onclick='starrer({{file[5][2]}});'><i id="starclass{{file[5][2]}}" class="fa fa-star-o fa-2x"></i></a>
 					</div>			
