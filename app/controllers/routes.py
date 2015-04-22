@@ -28,8 +28,19 @@ def index():
     if request.method == 'GET':
         return render_template('home.html', title='FireNotes', x=list_departments,search_form = Search())
     elif request.method == 'POST':
-        print 'this happened '
-        query = request.form['query']
+        if request.form.get('star'):
+            print 'AHAHHA'
+            stars.add_star(request.form['file_id'], request.form['user_rno'])
+            return 'Status Success'
+        
+        elif request.form.get('query'):
+            query = request.form['query']
+            return redirect(url_for('shownotes',query = query))
+
+@app.route('/show/<query>',methods = ['GET','POST'])
+@app.route('/show/<query>/',methods = ['GET','POST'])
+def shownotes(query):
+    if request.method == 'GET':
         indexed_search = files.query.whoosh_search(query)
         has_starred = False
         list_of_files = []
@@ -39,26 +50,19 @@ def index():
             except:
                 pass
             list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader))
-        return render_template('notes.html', 
-                        list_of_files=list_of_files,
-                        search_form = Search())
-
-
-
-@app.route('/show/<files>',methods = ['GET','POST'])
-@app.route('/show/<files>/',methods = ['GET','POST'])
-def shownotes(files):
-    if request.method == 'GET':
-        print 'I ARRIVED HERE '
-        print files
-        return render_template('notes.html',list_of_files = json.loads(files) , search_form = Search())
+        return render_template('notes.html',list_of_files = list_of_files , search_form = Search())
+    
     
     elif request.method == 'POST':
         if request.form.get('star'):
             print 'AHAHHA'
             stars.add_star(request.form['file_id'], request.form['user_rno'])
-            return 'JACKASS'
-    
+            return 'Status Success'
+        if request.form.get('query'):
+            query = request.form['query']
+            return redirect(url_for('shownotes',query = query))
+
+
 @app.route('/<name>/' , methods = ['GET','POST'])
 @app.route('/<name>' , methods = ['GET','POST'])
 def navigate(name):
@@ -66,28 +70,12 @@ def navigate(name):
     if request.method == 'GET':
         return render_template('semester.html', dept=name, semesters=semesters,search_form = Search())
     elif request.method == 'POST':
-
         if request.form.get('star'):  # Adding star
-            print "HAHAHA\n\n\n\n\n"
             stars.add_star(request.form['file_id'], request.form['user_rno'])
-            return "JACKASS"
-        
-        if request.form.get('query'):
+            return "Status Success"
+        elif request.form.get('query'):
             query = request.form['query']
-            indexed_search = files.query.whoosh_search(query)
-            has_starred = False
-            list_of_files = []
-            for file in indexed_search:
-                try:
-                    has_starred = stars.has_starred(file.id, session['rollnumber'])
-                except:
-                    pass
-                list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader))
-
-            #return redirect(url_for('shownotes',files = json.dumps(list_of_files)))
-            return render_template('notes.html', 
-                                list_of_files=list_of_files,
-                                search_form = Search())
+            return redirect(url_for('shownotes',query = query))
 
 
 @app.route('/<name>/<semester>', methods=['GET', 'POST'])
@@ -118,43 +106,7 @@ def UploadOrView(name, semester):
             return "1111"
         if request.form.get('query'):  
             query = request.form['query']
-            indexed_search = files.query.whoosh_search(query)
-            has_starred = False
-            list_of_files = []
-            for file in indexed_search:
-                try:
-                    has_starred = stars.has_starred(file.id, session['rollnumber'])
-                except:
-                    pass
-                list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader))
-            return render_template('notes.html', 
-                        list_of_files=list_of_files,
-                        search_form = Search())
-        if session['rollnumber'] and session['dept'] == name:
-            uploaded_files = request.files.getlist('pdf')
-            print uploaded_files
-            for file in uploaded_files:
-                if file and allowed_file(file.filename):
-                    print 'fuck yeah'
-                    filename = secure_filename(file.filename)
-                    file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                uploads = files(filename=filename, department=name, semester=semester, author= request.form['author'], tags = request.form['tags'], description = request.form['description'],downloads = 0 , uploader = session['rollnumber'])
-                db.session.add(uploads)
-                db.session.commit()
-            all_files = files.query.filter(and_(files.department.like(name),
-                                               files.semester.like(int(semester))))
-            has_starred = False
-            list_of_files = []
-            for file in all_files.all():
-                try:
-                    has_starred = stars.has_starred(file.id, session['rollnumber'])
-                except:
-                    pass
-                list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader))
-            return render_template('notes.html', list_of_files=list_of_files, dept=name, sem=semester,form=form,search_form = Search())
-        else:
-            return redirect(url_for('navigate'))
-
+            return redirect(url_for('shownotes',query = query))
 
 @app.route('/static/css/<filename>')
 def serveCss(filename):
@@ -215,6 +167,9 @@ def login():
                         db.session.commit()
                 return redirect(url_for('navigate', name=session['dept']))
     
+        if request.form.get('query'):  
+            query = request.form['query']
+            return redirect(url_for('shownotes',query = query))
     return render_template('login.html', title='Sign In', form=form,search_form = Search())
 
 
@@ -236,19 +191,8 @@ def Upload(name, semester):
         print request.form
         if request.form.get('query'):
             query = request.form['query']
-            indexed_search = files.query.whoosh_search(query)
-            has_starred = False
-            list_of_files = []
-            for file in indexed_search:
-                try:
-                    has_starred = stars.has_starred(file.id, session['rollnumber'])
-                except:
-                    pass
-                list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader))
-            return render_template('notes.html', 
-                        list_of_files=list_of_files,
-                        search_form = Search())
-              
+            return redirect(url_for('shownotes',query = query))
+
         if session['rollnumber'] and session['dept'] == name:
             uploaded_files = request.files.getlist('pdf')
             print uploaded_files
