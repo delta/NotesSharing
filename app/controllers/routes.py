@@ -14,6 +14,7 @@ from reportlab.pdfgen import canvas
 
 
 fileformat = re.compile(r'(\w*)\.(\w*)')
+
 departments = Department.query.all()
 list_departments = []
 for dept in departments:
@@ -131,22 +132,39 @@ def serveJs(filename):
 def serveImages(filename):
     return send_file("static/images/"+filename)
 
-
 @app.route('/<name>/<semester>/<filename>')
 def Download(name, semester, filename):
-    download_file = filename
-    updated_file = files.query.filter_by(filename = filename).first()
-    updated_file.downloads += 1
-    db.session.commit()
-    return send_file("../tmp/" + download_file, attachment_filename=download_file, as_attachment=True)
+    checkoutformat = re.search(fileformat,filename)
+    if checkoutformat.group(2) in ['jpg','jpeg','png','bmp']:
+        # surely there will be a pdf 
+        download_file = checkoutformat.group(1)+'.pdf'
+        updated_file = files.query.filter_by(filename = filename).first()
+        updated_file.downloads += 1
+        db.session.commit()
+        return send_file("../tmp/" + download_file, attachment_filename=download_file, as_attachment=True)
+    else:
+        download_file = filename
+        updated_file = files.query.filter_by(filename = filename).first()
+        updated_file.downloads += 1
+        db.session.commit()
+        return send_file("../tmp/" + download_file, attachment_filename=download_file, as_attachment=True)
 
 
 @app.route('/filename/<filename>')
 def fastdownload(filename):
-    updated_file = files.query.filter_by(filename = filename).first()
-    updated_file.downloads += 1
-    db.session.commit()
-    return send_file("../tmp/" + filename, attachment_filename=filename, as_attachment=True)
+    checkoutformat = re.search(fileformat,filename)
+    if checkoutformat.group(2) in ['jpg','jpeg','png','bmp']:
+        # surely there will be a pdf 
+        download_file = checkoutformat.group(1)+'.pdf'
+        updated_file = files.query.filter_by(filename = filename).first()
+        updated_file.downloads += 1
+        db.session.commit()
+        return send_file("../tmp/" + download_file, attachment_filename=download_file, as_attachment=True)
+    else:
+        updated_file = files.query.filter_by(filename = filename).first()
+        updated_file.downloads += 1
+        db.session.commit()
+        return send_file("../tmp/" + filename, attachment_filename=filename, as_attachment=True)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -208,9 +226,7 @@ def Upload(name, semester):
                         print 'regex matched'
                         if checkformat.group(2) in ['png','jpg','jpeg','bmp','gif']:
                             picture_files.append(filename)
-                            print 'its appending '
                     file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                    
                 if len(picture_files) == 0:
                     print ' this shouldnt happen'
                     uploads = files(filename=filename, department=name, semester=semester, author= request.form['author'], tags = request.form['tags'], description = request.form['description'],downloads = 0, uploader = session['rollnumber'])
@@ -227,7 +243,6 @@ def Upload(name, semester):
                     c.drawImage(pics,0,0)
                     c.showPage()
                     c.save()
-
                 uploads = files(filename=filename,department=name, semester=semester, author= request.form['author'], tags = request.form['tags'], description = request.form['description'],downloads = 0, uploader = session['rollnumber'])
                 db.session.add(uploads)
                 db.session.commit()
