@@ -14,7 +14,6 @@ from reportlab.pdfgen import canvas
 
 
 fileformat = re.compile(r'(\w*)\.(\w*)')
-
 departments = Department.query.all()
 list_departments = []
 for dept in departments:

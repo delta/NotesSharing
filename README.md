@@ -13,6 +13,17 @@ Fire Notes is a notes sharing platform where students can upload, maintain versi
 - [ ] Concatenate the files into a single pdf 
 - [x] Upload multiple files at once 
 
+##How to run
+* drop all db
+* delete app.db
+* delete search.db (Whoosh index)
+* delete migration folder
+```py
+python manager.py create_db
+python manager.py db init
+python manager.py gunicorn
+```
+
 ##Features
 * Upload and download notes.
 * Anybody can download any version of the file.
@@ -26,3 +37,5 @@ If you want to add features, fix bugs, or report issues, feel free to send a pul
 * Sriram S
 * Anantha Natarajan
 * Vignesh Manix
+
+
