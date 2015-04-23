@@ -2,7 +2,7 @@ from flask import render_template, flash, redirect, request, session, url_for, g
 from flask.ext.login import login_user, logout_user, current_user, login_required
 from werkzeug import secure_filename
 from sqlalchemy import or_, and_
-from app import app, db  # Your init files
+from app import app, db
 from .forms import LoginForm , MetaData , Search
 from ..models import Department, files,User
 import os
@@ -12,23 +12,25 @@ import re
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 import datetime
+import indexer
 
 fileformat = re.compile(r'(\w*)\.(\w*)')
 departments = Department.query.all()
 list_departments = []
+semesters = [i for i in range(1, 9)]
+
 for dept in departments:
     list_departments.append(dept.department)
-semesters = [i for i in range(1, 9)]
+
 def allowed_file(filename):
     return '.' in filename and \
         filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
 
-
+    
 @app.route('/',methods = ['GET','POST'])
 @app.route('/index', methods = ['GET','POST'])
 @app.route('/home', methods = ['GET','POST'])
 def index():
-    #print form
     if request.method == 'GET':
         return render_template('home.html', title='FireNotes', x=list_departments,search_form = Search())
     elif request.method == 'POST':
@@ -41,13 +43,27 @@ def index():
             query = request.form['query']
             return redirect(url_for('shownotes',query = query))
 
+        
 @app.route('/show/<query>',methods = ['GET','POST'])
 @app.route('/show/<query>/',methods = ['GET','POST'])
 def shownotes(query):
     if request.method == 'GET':
-        indexed_search = files.query.whoosh_search(query)
         has_starred = False
         list_of_files = []
+        all_files = []
+        books = indexer.search(query)
+        print books
+        for x in books:
+            all_files  = files.query.filter(files.filename.like(x))
+            for file in all_files:
+                list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader, file.upload_date.strftime("%d-%m-%Y %H:%M")))
+                try:
+                    has_starred = stars.has_starred(file.id, session['rollnumber'])
+                except:
+                    pass
+
+        indexed_search = files.query.whoosh_search(query)
+        has_starred = False
         for file in indexed_search:
             try:
                 has_starred = stars.has_starred(file.id, session['rollnumber'])
@@ -70,11 +86,10 @@ def shownotes(query):
 @app.route('/<name>/' , methods = ['GET','POST'])
 @app.route('/<name>' , methods = ['GET','POST'])
 def navigate(name):
-    # name is basically the department
     if request.method == 'GET':
         return render_template('semester.html', dept=name, semesters=semesters,search_form = Search())
     elif request.method == 'POST':
-        if request.form.get('star'):  # Adding star
+        if request.form.get('star'):
             stars.add_star(request.form['file_id'], request.form['user_rno'])
             return "Status Success"
         elif request.form.get('query'):
@@ -104,7 +119,7 @@ def UploadOrView(name, semester):
         return render_template("notes.html", list_of_files=list_of_files, dept=name, sem=semester,form=form,search_form = Search())
 
     elif request.method == 'POST':
-        if request.form.get('star'):  # Adding star
+        if request.form.get('star'):
             stars.add_star(request.form['file_id'], request.form['user_rno'])
         if request.form.get('query'):  
             query = request.form['query']
@@ -224,6 +239,7 @@ def Upload(name, semester):
                         if checkformat.group(2) in ['png','jpg','jpeg','bmp','gif']:
                             picture_files.append(filename)
                     file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                    indexer.index_it(filename)
                 if len(picture_files) == 0:
                     print ' this shouldnt happen'
                     uploads = files(filename=filename, department=name, semester=semester, author= request.form['author'], tags = request.form['tags'], description = request.form['description'],downloads = 0, uploader = session['rollnumber'], upload_date = datetime.datetime.now())
@@ -243,7 +259,7 @@ def Upload(name, semester):
                 uploads = files(filename=filename,department=name, semester=semester, author= request.form['author'], tags = request.form['tags'], description = request.form['description'],downloads = 0, uploader = session['rollnumber'], upload_date = datetime.datetime.now())
                 db.session.add(uploads)
                 db.session.commit()
-
+            
             all_files = files.query.filter(and_(files.department.like(name),
                                                files.semester.like(int(semester))))
             has_starred = False
