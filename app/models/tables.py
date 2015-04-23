@@ -33,6 +33,7 @@ class files(db.Model):
     description = db.Column(db.String(100) , index= True)
     downloads = db.Column(db.Integer , index = True)
     uploader = db.Column(db.String(64)  , index = True)
+    upload_date = db.Column(db.DateTime()  , index = True)
     def __repr__(self):
         return '<File {0}-> {1} >'.format(self.filename, self.department)
 

@@ -11,7 +11,7 @@ import stars
 import re 
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
-
+import datetime
 
 fileformat = re.compile(r'(\w*)\.(\w*)')
 departments = Department.query.all()
@@ -53,7 +53,7 @@ def shownotes(query):
                 has_starred = stars.has_starred(file.id, session['rollnumber'])
             except:
                 pass
-            list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader))
+            list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader, file.upload_date.strftime("%d-%m-%Y %H:%M")))
         return render_template('notes.html',list_of_files = list_of_files , search_form = Search())
     
     
@@ -100,14 +100,12 @@ def UploadOrView(name, semester):
                 has_starred = stars.has_starred(file.id, session['rollnumber'])
             except:
                 pass
-            list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader))
+            list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader, file.upload_date.strftime("%d %b %Y %H:%M")))
         return render_template("notes.html", list_of_files=list_of_files, dept=name, sem=semester,form=form,search_form = Search())
 
     elif request.method == 'POST':
         if request.form.get('star'):  # Adding star
-            print "LALALAL\n\n\n\n\n"
             stars.add_star(request.form['file_id'], request.form['user_rno'])
-            return "1111"
         if request.form.get('query'):  
             query = request.form['query']
             return redirect(url_for('shownotes',query = query))
@@ -228,7 +226,7 @@ def Upload(name, semester):
                     file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
                 if len(picture_files) == 0:
                     print ' this shouldnt happen'
-                    uploads = files(filename=filename, department=name, semester=semester, author= request.form['author'], tags = request.form['tags'], description = request.form['description'],downloads = 0, uploader = session['rollnumber'])
+                    uploads = files(filename=filename, department=name, semester=semester, author= request.form['author'], tags = request.form['tags'], description = request.form['description'],downloads = 0, uploader = session['rollnumber'], upload_date = datetime.datetime.now())
                     db.session.add(uploads)
                     db.session.commit()
 
@@ -242,7 +240,7 @@ def Upload(name, semester):
                     c.drawImage(pics,0,0)
                     c.showPage()
                     c.save()
-                uploads = files(filename=filename,department=name, semester=semester, author= request.form['author'], tags = request.form['tags'], description = request.form['description'],downloads = 0, uploader = session['rollnumber'])
+                uploads = files(filename=filename,department=name, semester=semester, author= request.form['author'], tags = request.form['tags'], description = request.form['description'],downloads = 0, uploader = session['rollnumber'], upload_date = datetime.datetime.now())
                 db.session.add(uploads)
                 db.session.commit()
 
@@ -255,7 +253,7 @@ def Upload(name, semester):
                     has_starred = stars.has_starred(file.id, session['rollnumber'])
                 except:
                     pass
-                list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader))
+                list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader, file.upload_date.strftime("%d-%m-%Y %H:%M")))
             return redirect(url_for('UploadOrView',name=name, semester=semester) )
         else:
             return redirect(url_for('navigate'))
