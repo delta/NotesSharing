@@ -8,8 +8,12 @@ from ..models import Department, files,User
 import os
 from .auth import server_login
 import stars
-import json 
+import re 
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
 
+
+fileformat = re.compile(r'(\w*)\.(\w*)')
 departments = Department.query.all()
 list_departments = []
 for dept in departments:
@@ -195,14 +199,39 @@ def Upload(name, semester):
 
         if session['rollnumber'] and session['dept'] == name:
             uploaded_files = request.files.getlist('pdf')
-            print uploaded_files
+            picture_files = []
             for file in uploaded_files:
-                    if file and allowed_file(file.filename):
-                        filename = secure_filename(file.filename)
-                        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                if file and allowed_file(file.filename):
+                    filename = secure_filename(file.filename)
+                    checkformat = re.search(fileformat,filename)
+                    if checkformat:
+                        print 'regex matched'
+                        if checkformat.group(2) in ['png','jpg','jpeg','bmp','gif']:
+                            picture_files.append(filename)
+                            print 'its appending '
+                    file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                    
+                if len(picture_files) == 0:
+                    print ' this shouldnt happen'
                     uploads = files(filename=filename, department=name, semester=semester, author= request.form['author'], tags = request.form['tags'], description = request.form['description'],downloads = 0, uploader = session['rollnumber'])
                     db.session.add(uploads)
                     db.session.commit()
+
+            if picture_files:
+                print 'this should freaking happen'
+                picture_files =  [app.config['UPLOAD_FOLDER']+'/'+f  for f in picture_files] 
+                print picture_files
+                c = canvas.Canvas(app.config['UPLOAD_FOLDER'] + '/' + checkformat.group(1)+'.pdf',pagesize=(460.0,820.0))
+                width , height = (460.0,820.0)
+                for pics in picture_files:
+                    c.drawImage(pics,0,0)
+                    c.showPage()
+                    c.save()
+
+                uploads = files(filename=filename,department=name, semester=semester, author= request.form['author'], tags = request.form['tags'], description = request.form['description'],downloads = 0, uploader = session['rollnumber'])
+                db.session.add(uploads)
+                db.session.commit()
+
             all_files = files.query.filter(and_(files.department.like(name),
                                                files.semester.like(int(semester))))
             has_starred = False
