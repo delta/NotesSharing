@@ -14,11 +14,13 @@ from reportlab.pdfgen import canvas
 import datetime
 
 fileformat = re.compile(r'(\w*)\.(\w*)')
+'''
 departments = Department.query.all()
 list_departments = []
 for dept in departments:
     list_departments.append(dept.department)
 semesters = [i for i in range(1, 9)]
+'''
 def allowed_file(filename):
     return '.' in filename and \
         filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
