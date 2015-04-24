@@ -17,12 +17,9 @@ import indexer
 fileformat = re.compile(r'(\w*)\.(\w*)')
 departments = Department.query.all()
 list_departments = []
-semesters = [i for i in range(1, 9)]
-
 for dept in departments:
     list_departments.append(dept.department)
 semesters = [i for i in range(1, 9)]
-
 def allowed_file(filename):
     return '.' in filename and \
         filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
@@ -52,17 +49,18 @@ def shownotes(query):
         has_starred = False
         list_of_files = []
         all_files = []
-        books = indexer.search(query)
-        print books
-        for x in books:
-            all_files  = files.query.filter(files.filename.like(x))
-            for file in all_files:
-                list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader, file.upload_date.strftime("%d-%m-%Y %H:%M")))
-                try:
-                    has_starred = stars.has_starred(file.id, session['rollnumber'])
-                except:
-                    pass
-
+        try:
+            books = indexer.search(query)
+            for x in books:
+                all_files  = files.query.filter(files.filename.like(x))
+                for file in all_files:
+                    list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader, file.upload_date.strftime("%d-%m-%Y %H:%M")))
+                    try:
+                        has_starred = stars.has_starred(file.id, session['rollnumber'])
+                    except:
+                        pass
+        except:
+            pass
         indexed_search = files.query.whoosh_search(query)
         has_starred = False
         for file in indexed_search:
@@ -70,7 +68,7 @@ def shownotes(query):
                 has_starred = stars.has_starred(file.id, session['rollnumber'])
             except:
                 pass
-            list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader, file.upload_date.strftime("%d-%m-%Y %H:%M")))
+                list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader, file.upload_date.strftime("%d-%m-%Y %H:%M")))
         return render_template('notes.html',list_of_files = list_of_files , search_form = Search())
     
     
@@ -231,21 +229,22 @@ def Upload(name, semester):
         if session['rollnumber'] and session['dept'] == name:
             uploaded_files = request.files.getlist('pdf')
             picture_files = []
+
             for file in uploaded_files:
                 if file and allowed_file(file.filename):
                     filename = secure_filename(file.filename)
                     checkformat = re.search(fileformat,filename)
                     if checkformat:
-                        print 'regex matched'
                         if checkformat.group(2) in ['png','jpg','jpeg','bmp','gif']:
                             picture_files.append(filename)
                     file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                    indexer.index_it(filename)
                 if len(picture_files) == 0:
                     print ' this shouldnt happen'
                     uploads = files(filename=filename, department=name, semester=semester, author= request.form['author'], tags = request.form['tags'], description = request.form['description'],downloads = 0, uploader = session['rollnumber'], upload_date = datetime.datetime.now())
                     db.session.add(uploads)
                     db.session.commit()
+
+                    indexer.index_it(filename)
 
             if picture_files:
                 print 'this should freaking happen'
