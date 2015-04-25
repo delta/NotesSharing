@@ -10,53 +10,10 @@
 	<a class="btn btn-primary btn-sm" href="/{{dept}}/{{sem}}/upload">Upload</a>
 	<br>
 	<br>
-	<!--div style="width:30%; margin:0 auto;">
-		<h5>  </h5>
-		<form action="" method=post enctype="multipart/form-data">
-                        {{ form.hidden_tag() }}
-                        {{ message }}
-                        <div>
-                               {{ form.author(size=20,class="form-control",placeholder="Enter author") }}
-                               {{ form.tags(size=20,class="form-control", placeholder = "CT1,CT2,SEM")}}
-                               {{ form.description(size=100,class="form-control",placeholder="Description of subject") }}
-       <div style='height: 0px;width: 0px; overflow:hidden;'>
-			<input type="file" class="btn btn-danger" id="upfile" name="pdf" multiple="" onchange="sub(this)" />
-			</div>
-			<br>
-			<input type="button" class="btn btn-primary" value="Choose File" onclick="getFile()" />
-			<input type="submit" class="btn btn-primary" value="upload notes"></input>
-			<br>
-			
-	
-                </div>
-		</form>
-	</div-->
 	{% endif %}
 	<script src="/static/js/jquery.min.js"></script>
-	<script type="text/javascript">
-		function starrer(fid){
-		if(document.getElementById("starclass"+fid).className !="fa fa-star fa-2x")	{
-			console.log(String(fid));
-			request = $.ajax({
-				url: ".",
-				type: "post",
-				data: {
-					star: "1",
-					file_id: String(fid),
-					user_rno: {{session['rollnumber']}},
-				}
-			});
-			request.done(function (response, textStatus, jqXHR){
-				console.log(response);
-				document.getElementById("starclass"+fid).className="fa fa-star fa-2x";
-				down_count = parseInt(document.getElementsByName("count"+fid)[0].innerHTML)+1;
-				document.getElementsByName("count"+fid)[0].innerHTML = down_count;
+	<script src="/static/js/custom.js"></script>
 
-			});
-		}
-	}
-
-	</script>
 	<table class="table table-striped table-hover" style="width:75%; margin:0 auto">
 		<thead>
 			<tr>
@@ -92,7 +49,9 @@
 				<td>
                                         {% if (not file[5][0])  and session['rollnumber'] %} <!--and session['dept']==dept %}-->
 					<div id="starlink">
-						<a onclick='starrer({{file[5][2]}});'><i id="starclass{{file[5][2]}}" class="fa fa-star-o fa-2x"></i></a>
+					  <a onclick='starrer({{file[5][2]}}, {{session['rollnumber']}});'>
+					    <i id="starclass{{file[5][2]}}" class="fa fa-star-o fa-2x"></i>
+					  </a>
 					</div>			
 					{%else%}
 					<div>
