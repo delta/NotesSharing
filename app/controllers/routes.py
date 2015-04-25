@@ -68,7 +68,7 @@ def shownotes(query):
                 has_starred = stars.has_starred(file.id, session['rollnumber'])
             except:
                 pass
-                list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader, file.upload_date.strftime("%d-%m-%Y %H:%M")))
+            list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader, file.upload_date.strftime("%d-%m-%Y %H:%M")))
         return render_template('notes.html',list_of_files = list_of_files , search_form = Search())
     
     
@@ -221,7 +221,6 @@ def Upload(name, semester):
        return render_template("upload.html",dept=name, sem=semester,form=form,search_form = Search())
 
     elif request.method == 'POST':
-        print request.form
         if request.form.get('query'):
             query = request.form['query']
             return redirect(url_for('shownotes',query = query))
