@@ -33,13 +33,13 @@ def search(query):
     
     #Q = str('http://0.0.0.0:8983/solr/select?q=text:'+query+'&wt=json&indent=true')
     Q = "http://localhost:8983/solr/firenotes/select?wt=json&indent=true&q="+query
-    print 'RESPONSE ' + Q
+    #print 'RESPONSE ' + Q
     c.setopt(c.URL, Q)
     c.setopt(c.WRITEFUNCTION, data.write)
     c.perform()
     try:
         di = json.loads(data.getvalue())
-        print di
+        #print di
         ans = di["response"]["docs"]
         books = []
         for i in ans:
