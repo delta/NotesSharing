@@ -16,7 +16,7 @@ def index_it(file_name):
             if str(file) == str(file_name):
                 #s="http://0.0.0.0:8983/solr/update/extract?stream.file="+root+urllib.quote(file, '')+"&stream.contentType=application/pdf&literal.id="+urllib.quote(file, '')
 #                s = "http://localhost:8983/solr/firenotes/update/extract?literal.id="+urllib.quote(file,'')+"&commit=true -F myfile=@" + basedir+"/../../tmp/"+file
-                x = "http://localhost:8983/solr/firenotes/update/extract?literal.id="+urllib.quote('nirvik','')+"&commit=true'"
+                x = "http://localhost:8983/solr/firenotes/update/extract?literal.id="+urllib.quote(file,'')+"&commit=true'"
                 y = " -F 'myfile=@"+basedir+"/../../tmp/"+file+"'"
                 cmd = "curl '"
                 os.system(cmd + x + y )
