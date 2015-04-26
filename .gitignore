@@ -1,3 +1,4 @@
+*.rdb
 migrations/
 /whoosh_index
 /search.db

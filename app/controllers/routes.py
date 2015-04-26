@@ -13,6 +13,10 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 import datetime
 import indexer
+from celery import Celery 
+
+celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
+celery.conf.update(app.config)
 
 fileformat = re.compile(r'(\w*)\.(\w*)')
 departments = Department.query.all()
@@ -20,11 +24,17 @@ list_departments = []
 for dept in departments:
     list_departments.append(dept.department)
 semesters = [i for i in range(1, 9)]
+
 def allowed_file(filename):
     return '.' in filename and \
         filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
 
-    
+
+@celery.task
+def indexing(filename):
+   indexer.index_it(filename)
+
+
 @app.route('/',methods = ['GET','POST'])
 @app.route('/index', methods = ['GET','POST'])
 @app.route('/home', methods = ['GET','POST'])
@@ -49,6 +59,7 @@ def shownotes(query):
         has_starred = False
         list_of_files = []
         all_files = []
+        list_of_files = []
         try:
             books = indexer.search(query)
             for x in books:
@@ -243,7 +254,7 @@ def Upload(name, semester):
                     db.session.add(uploads)
                     db.session.commit()
 
-                    indexer.index_it(filename)
+                    indexing.apply_async((filename,))
 
             if picture_files:
                 print 'this should freaking happen'

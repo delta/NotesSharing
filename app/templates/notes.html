@@ -6,7 +6,7 @@
 	<ul class="pager">
 		<li><a href="/{{dept}}">Go back</a></li>
 	</ul>  
-	{% if session['rollnumber'] and session['dept']==dept %}
+	{% if (session['rollnumber'] and session['dept']==dept) or dept==9 %}
 	<a class="btn btn-primary btn-sm" href="/{{dept}}/{{sem}}/upload">Upload</a>
 	<br>
 	<br>

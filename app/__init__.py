@@ -11,6 +11,8 @@ env = os.environ.get('FIRENOTES_ENV','dev')
 app.config.from_object('app.settings.%sConfig' % env.capitalize())
 app.config['ENV'] = env
 
+
+#print app.config
 # We are setting our environment to development
 import flask.ext.whooshalchemy as whooshalchemy
 from controllers import routes
