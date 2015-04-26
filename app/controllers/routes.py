@@ -271,7 +271,7 @@ def Upload(name, semester):
                     uploads = files(filename=filename, department=name, semester=semester, author= request.form['author'], tags = request.form['tags'], description = request.form['description'],downloads = 0, uploader = session['rollnumber'], upload_date = datetime.datetime.now())
                     db.session.add(uploads)
                     db.session.commit()
-
+                
                     indexing.apply_async((filename,))
                     #indexer.index_it(filename, fileFormat)
 

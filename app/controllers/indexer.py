@@ -14,16 +14,11 @@ def index_it(file_name,fileFormat):
     for root, dirs, files in os.walk(basedir+'/../../tmp/'):
         for file in files:
             if str(file) == str(file_name):
-                #s="http://0.0.0.0:8983/solr/update/extract?stream.file="+root+urllib.quote(file, '')+"&stream.contentType=application/pdf&literal.id="+urllib.quote(file, '')
-#                s = "http://localhost:8983/solr/firenotes/update/extract?literal.id="+urllib.quote(file,'')+"&commit=true -F myfile=@" + basedir+"/../../tmp/"+file
-                x = "http://0.0.0.0:8983/solr/update/extract?literal.id="+urllib.quote(file,'')+"&commit=true&stream.contentType="+fileFormat+"'"
+                x = "http://0.0.0.0:8983/solr/firenotes/update/extract?literal.id="+urllib.quote(file,'')+"&commit=true&stream.contentType="+fileFormat+"'"
                 print x
                 y = " -F 'myfile=@"+basedir+"/../../tmp/"+file+"'"
                 cmd = "curl '"
                 os.system(cmd + x + y )
-                #requests.post(s)
-                #c.setopt(c.URL,s)
-                #c.perform()
                 print "SUCESS!!"
     print 'COMON ITS INDEXED NOW ' + file_name
     
@@ -32,8 +27,8 @@ def search(query):
     c = pycurl.Curl()
     data = BytesIO()
     
-    Q = str('http://0.0.0.0:8983/solr/select?q=text:'+query+'&wt=json&indent=true')
-    #Q = "http://0.0.0.0:8983/solr/select?wt=json&indent=true&q="+query
+    Q = str('http://0.0.0.0:8983/solr/firenotes/select?q=text:'+query+'&wt=json&indent=true')
+    #Q = "http://0.0.0.0:8983/solr/firenotes/select?wt=json&indent=true&q="+query
     #print 'RESPONSE ' + Q
     c.setopt(c.URL, Q)
     c.setopt(c.WRITEFUNCTION, data.write)
