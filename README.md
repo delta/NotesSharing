@@ -18,6 +18,8 @@ Fire Notes is a notes sharing platform where students can upload, maintain versi
 * delete app.db
 * delete search.db (Whoosh index)
 * delete migration folder
+* start redis-server
+* initiate apache solr -> ./bin/solr start -e cloud -noprompt
 ```py
 python manager.py create_db
 python manager.py db init
