@@ -27,7 +27,7 @@ def search(query):
     c = pycurl.Curl()
     data = BytesIO()
     
-    Q = str('http://0.0.0.0:8983/solr/firenotes/select?q=text:'+query+'&wt=json&indent=true')
+    Q = str('http://0.0.0.0:8983/solr/firenotes/select?q='+query+'&wt=json&indent=true')
     #Q = "http://0.0.0.0:8983/solr/firenotes/select?wt=json&indent=true&q="+query
     #print 'RESPONSE ' + Q
     c.setopt(c.URL, Q)
