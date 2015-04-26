@@ -8,7 +8,7 @@ import os
 migrate = Migrate(app, db)
 
 manager = Manager(app)
-manager.add_command('runserver',Server(port=5000))
+manager.add_command('runserver',Server(port=5000,host="0.0.0.0"))
 manager.add_command('shell',Shell())
 manager.add_command('gunicorn', GunicornServer(app))
 manager.add_command('db',MigrateCommand)

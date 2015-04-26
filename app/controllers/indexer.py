@@ -8,7 +8,7 @@ import pprint
 import json
 import requests
 
-def index_it(file_name):
+def index_it(file_name,fileFormat):
     c=pycurl.Curl()
     basedir = os.path.abspath(os.path.dirname(__file__))
     for root, dirs, files in os.walk(basedir+'/../../tmp/'):
@@ -16,7 +16,8 @@ def index_it(file_name):
             if str(file) == str(file_name):
                 #s="http://0.0.0.0:8983/solr/update/extract?stream.file="+root+urllib.quote(file, '')+"&stream.contentType=application/pdf&literal.id="+urllib.quote(file, '')
 #                s = "http://localhost:8983/solr/firenotes/update/extract?literal.id="+urllib.quote(file,'')+"&commit=true -F myfile=@" + basedir+"/../../tmp/"+file
-                x = "http://localhost:8983/solr/firenotes/update/extract?literal.id="+urllib.quote(file,'')+"&commit=true'"
+                x = "http://0.0.0.0:8983/solr/update/extract?literal.id="+urllib.quote(file,'')+"&commit=true&stream.contentType="+fileFormat+"'"
+                print x
                 y = " -F 'myfile=@"+basedir+"/../../tmp/"+file+"'"
                 cmd = "curl '"
                 os.system(cmd + x + y )
@@ -31,8 +32,8 @@ def search(query):
     c = pycurl.Curl()
     data = BytesIO()
     
-    #Q = str('http://0.0.0.0:8983/solr/select?q=text:'+query+'&wt=json&indent=true')
-    Q = "http://localhost:8983/solr/firenotes/select?wt=json&indent=true&q="+query
+    Q = str('http://0.0.0.0:8983/solr/select?q=text:'+query+'&wt=json&indent=true')
+    #Q = "http://0.0.0.0:8983/solr/select?wt=json&indent=true&q="+query
     #print 'RESPONSE ' + Q
     c.setopt(c.URL, Q)
     c.setopt(c.WRITEFUNCTION, data.write)
@@ -41,14 +42,15 @@ def search(query):
         di = json.loads(data.getvalue())
         #print di
         ans = di["response"]["docs"]
+        #print ans
         books = []
         for i in ans:
+            #print i
             try:    
-                books.append(str(i["stream_name"][0]))
+                books.append(str(i["id"]))
             except:
                 pass
-    #pprint.pprint(books)
-        return books
+        return list(set(books))
     except:
         return []
 
