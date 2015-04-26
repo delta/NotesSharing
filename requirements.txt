@@ -30,3 +30,4 @@ gunicorn
 reportlab
 requests
 celery
+redis
