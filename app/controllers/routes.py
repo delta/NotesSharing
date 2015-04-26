@@ -24,6 +24,15 @@ def allowed_file(filename):
     return '.' in filename and \
         filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
 
+
+@app.route('/faq', methods = ['GET','POST'])
+def faq():
+    if request.method == 'GET':
+        return render_template("faq.html",search_form = Search())
+    elif request.method == 'POST':
+        if request.form.get('query'):
+            query = request.form['query']
+            return redirect(url_for('shownotes',query = query))
     
 @app.route('/',methods = ['GET','POST'])
 @app.route('/index', methods = ['GET','POST'])
@@ -49,12 +58,18 @@ def shownotes(query):
         has_starred = False
         list_of_files = []
         all_files = []
+        uniq = {}
         try:
             books = indexer.search(query)
             for x in books:
                 all_files  = files.query.filter(files.filename.like(x))
                 for file in all_files:
-                    list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader, file.upload_date.strftime("%d-%m-%Y %H:%M")))
+                    try:
+                        if uniq[file.filename]:
+                            print "Duplicate"
+                    except:
+                        list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader, file.upload_date.strftime("%d-%m-%Y %H:%M")))
+                        uniq[file.filename] = True
                     try:
                         has_starred = stars.has_starred(file.id, session['rollnumber'])
                     except:
@@ -115,6 +130,8 @@ def UploadOrView(name, semester):
             except:
                 pass
             list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader, file.upload_date.strftime("%d %b %Y %H:%M")))
+
+        list_of_files = list(set(list_of_files))
         return render_template("notes.html", list_of_files=list_of_files, dept=name, sem=semester,form=form,search_form = Search())
 
     elif request.method == 'POST':
@@ -230,6 +247,7 @@ def Upload(name, semester):
             picture_files = []
 
             for file in uploaded_files:
+                fileFormat =  file.content_type
                 if file and allowed_file(file.filename):
                     filename = secure_filename(file.filename)
                     checkformat = re.search(fileformat,filename)
@@ -243,7 +261,7 @@ def Upload(name, semester):
                     db.session.add(uploads)
                     db.session.commit()
 
-                    indexer.index_it(filename)
+                    indexer.index_it(filename, fileFormat)
 
             if picture_files:
                 print 'this should freaking happen'
