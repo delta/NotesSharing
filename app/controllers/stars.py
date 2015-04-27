@@ -9,8 +9,8 @@ def add_star(file_id, user_rno):
     db.session.commit()
 
 def get_stars(file_id):
-    all_stars = stars.query.filter(stars.file_id.like(file_id)).all()
-    return len(all_stars)
+    all_stars = stars.query.with_entities(stars.starrer).filter(stars.file_id.like(file_id)).distinct()
+    return len(list(all_stars))
 
 def has_starred(file_id, user_rno):
     starred = stars.query.filter(and_(stars.file_id.like(file_id), 
@@ -18,4 +18,4 @@ def has_starred(file_id, user_rno):
     return len(starred) >= 1
 
 if __name__=='__main__':
-    print has_starred(1, '106112091')
+    print get_stars(1)

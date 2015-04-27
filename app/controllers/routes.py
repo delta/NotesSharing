@@ -35,8 +35,7 @@ def index():
         return render_template('home.html', title='FireNotes', x=list_departments,search_form = Search())
     elif request.method == 'POST':
         if request.form.get('star'):
-            print 'AHAHHA'
-            stars.add_star(request.form['file_id'], request.form['user_rno'])
+            stars.add_star(request.form['file_id'], session['rollnumber'])
             return 'Status Success'
         
         elif request.form.get('query'):
