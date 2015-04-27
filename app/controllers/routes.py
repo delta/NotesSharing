@@ -235,6 +235,9 @@ def login():
 
 @app.route('/logout', methods=['GET', 'POST'])
 def logout():
+    session.pop('rollnumber', None)
+    session.pop('year', None)
+    session.pop('dept', None)
     session.clear()
     return redirect(url_for('login'))
 

@@ -44,7 +44,6 @@ def server_login(username, password):
         username = process_username(username)
         logged_in = imap_login(username, password)
         year, dept = parse_username(username)
-        # Yet to test the session.
         flask.session['rollnumber'] = username
         flask.session['year'] = year
         flask.session['dept'] = dept
