@@ -10,7 +10,7 @@ Fire Notes is a notes sharing platform where students can upload, maintain versi
 - [x] Search files by metadata 
 - [ ] Add subjects of each semester to database 
 - [ ] Subjects Scraper 
-- [ ] Concatenate the files into a single pdf 
+- [x] Concatenate the files into a single pdf 
 - [x] Upload multiple files at once 
 
 ##How to run
@@ -18,6 +18,8 @@ Fire Notes is a notes sharing platform where students can upload, maintain versi
 * delete app.db
 * delete search.db (Whoosh index)
 * delete migration folder
+* start redis-server
+* initiate apache solr -> ./bin/solr start -e cloud -noprompt
 ```py
 python manager.py create_db
 python manager.py db init

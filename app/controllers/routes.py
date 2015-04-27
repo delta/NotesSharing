@@ -13,19 +13,36 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 import datetime
 import indexer
+from celery import Celery 
+
+celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
+celery.conf.update(app.config)
 
 fileformat = re.compile(r'(\w*)\.(\w*)')
 departments = Department.query.all()
 list_departments = []
-semesters = [i for i in range(1, 9)]
-
 for dept in departments:
     list_departments.append(dept.department)
+semesters = [i for i in range(1, 9)]
 
 def allowed_file(filename):
     return '.' in filename and \
         filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
 
+
+@celery.task
+def indexing(filename):
+   indexer.index_it(filename)
+
+
+@app.route('/faq', methods = ['GET','POST'])
+def faq():
+    if request.method == 'GET':
+        return render_template("faq.html",search_form = Search())
+    elif request.method == 'POST':
+        if request.form.get('query'):
+            query = request.form['query']
+            return redirect(url_for('shownotes',query = query))
     
 @app.route('/',methods = ['GET','POST'])
 @app.route('/index', methods = ['GET','POST'])
@@ -50,17 +67,25 @@ def shownotes(query):
         has_starred = False
         list_of_files = []
         all_files = []
-        books = indexer.search(query)
-        print books
-        for x in books:
-            all_files  = files.query.filter(files.filename.like(x))
-            for file in all_files:
-                list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader, file.upload_date.strftime("%d-%m-%Y %H:%M")))
-                try:
-                    has_starred = stars.has_starred(file.id, session['rollnumber'])
-                except:
-                    pass
-
+        list_of_files = []
+        uniq = {}
+        try:
+            books = indexer.search(query)
+            for x in books:
+                all_files  = files.query.filter(files.filename.like(x))
+                for file in all_files:
+                    try:
+                        if uniq[file.filename]:
+                            print "Duplicate"
+                    except:
+                        list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader, file.upload_date.strftime("%d-%m-%Y %H:%M")))
+                        uniq[file.filename] = True
+                    try:
+                        has_starred = stars.has_starred(file.id, session['rollnumber'])
+                    except:
+                        pass
+        except:
+            pass
         indexed_search = files.query.whoosh_search(query)
         has_starred = False
         for file in indexed_search:
@@ -115,6 +140,8 @@ def UploadOrView(name, semester):
             except:
                 pass
             list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader, file.upload_date.strftime("%d %b %Y %H:%M")))
+
+        list_of_files = list(set(list_of_files))
         return render_template("notes.html", list_of_files=list_of_files, dept=name, sem=semester,form=form,search_form = Search())
 
     elif request.method == 'POST':
@@ -221,7 +248,6 @@ def Upload(name, semester):
        return render_template("upload.html",dept=name, sem=semester,form=form,search_form = Search())
 
     elif request.method == 'POST':
-        print request.form
         if request.form.get('query'):
             query = request.form['query']
             return redirect(url_for('shownotes',query = query))
@@ -229,26 +255,27 @@ def Upload(name, semester):
         if session['rollnumber'] and session['dept'] == name:
             uploaded_files = request.files.getlist('pdf')
             picture_files = []
+
             for file in uploaded_files:
+                fileFormat =  file.content_type
                 if file and allowed_file(file.filename):
                     filename = secure_filename(file.filename)
                     checkformat = re.search(fileformat,filename)
                     if checkformat:
-                        print 'regex matched'
                         if checkformat.group(2) in ['png','jpg','jpeg','bmp','gif']:
                             picture_files.append(filename)
                     file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                    indexer.index_it(filename)
                 if len(picture_files) == 0:
                     print ' this shouldnt happen'
                     uploads = files(filename=filename, department=name, semester=semester, author= request.form['author'], tags = request.form['tags'], description = request.form['description'],downloads = 0, uploader = session['rollnumber'], upload_date = datetime.datetime.now())
                     db.session.add(uploads)
                     db.session.commit()
+                
+                    indexing.apply_async((filename,))
+                    #indexer.index_it(filename, fileFormat)
 
             if picture_files:
-                print 'this should freaking happen'
                 picture_files =  [app.config['UPLOAD_FOLDER']+'/'+f  for f in picture_files] 
-                print picture_files
                 c = canvas.Canvas(app.config['UPLOAD_FOLDER'] + '/' + checkformat.group(1)+'.pdf',pagesize=(460.0,820.0))
                 width , height = (460.0,820.0)
                 for pics in picture_files:

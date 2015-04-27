@@ -9,7 +9,7 @@ from flask.ext.script import Command, Option
 class GunicornServer(Command):
     """Run the app within Gunicorn"""
 
-    def __init__(self,app, host='127.0.0.1', port=8000, workers=4):
+    def __init__(self,app, host='127.0.0.1', port=8080, workers=4):
         self.port = port
         self.host = host
         self.workers = workers

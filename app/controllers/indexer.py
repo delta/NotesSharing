@@ -1,41 +1,53 @@
 import urllib
-import shutil
-import glob
+#import shutil
+#import glob
 import os
 import pycurl
 from io import BytesIO
 import pprint
 import json
+import requests
 
-
-def index_it(file_name):
+def index_it(file_name,fileFormat):
     c=pycurl.Curl()
-    for root, dirs, files in os.walk("/home/sananth12/Desktop/Github/NotesSharing/tmp/"):
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    for root, dirs, files in os.walk(basedir+'/../../tmp/'):
         for file in files:
             if str(file) == str(file_name):
-                s="http://0.0.0.0:8983/solr/update/extract?stream.file="+root+urllib.quote(file, '')+"&stream.contentType=application/pdf&literal.id="+urllib.quote(file, '')
-                print "SUCESS!!" + s
-                c.setopt(c.URL,s)
-                c.perform()
-    os.system("curl 'http://0.0.0.0:8983/solr/update?stream.body=%3Ccommit/%3E' &")
-
+                x = "http://0.0.0.0:8983/solr/firenotes/update/extract?literal.id="+urllib.quote(file,'')+"&commit=true&stream.contentType="+fileFormat+"'"
+                print x
+                y = " -F 'myfile=@"+basedir+"/../../tmp/"+file+"'"
+                cmd = "curl '"
+                os.system(cmd + x + y )
+                print "SUCESS!!"
+    print 'COMON ITS INDEXED NOW ' + file_name
+    
 def search(query):
+    print query
     c = pycurl.Curl()
     data = BytesIO()
     
-    Q = str('http://0.0.0.0:8983/solr/select?q=text:'+query+'&wt=json&indent=true')
-
+    Q = str('http://0.0.0.0:8983/solr/firenotes/select?q='+query+'&wt=json&indent=true')
+    #Q = "http://0.0.0.0:8983/solr/firenotes/select?wt=json&indent=true&q="+query
+    #print 'RESPONSE ' + Q
     c.setopt(c.URL, Q)
     c.setopt(c.WRITEFUNCTION, data.write)
     c.perform()
-
-    di = json.loads(data.getvalue())
-    ans = di["response"]["docs"]
-    books = []
-    for i in ans:
-        books.append(str(i["id"]))
-    pprint.pprint(books)
-    return books
+    try:
+        di = json.loads(data.getvalue())
+        #print di
+        ans = di["response"]["docs"]
+        #print ans
+        books = []
+        for i in ans:
+            #print i
+            try:    
+                books.append(str(i["id"]))
+            except:
+                pass
+        return list(set(books))
+    except:
+        return []
 
 # os.chdir("/home/solr/some_books/books.nitt.edu/books/new/Computers/")
 # shutil.copy(os.path.join("/home/solr/tmpupload/",file),os.path.join("/home/solr/public_html/upload/",file))
