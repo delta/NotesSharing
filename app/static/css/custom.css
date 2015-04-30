@@ -7,14 +7,15 @@ h1 , h2 {
 }
 footer {
     font-size: 12px;
-    position:absolute;
+    position:relative;
     left:0px;
     bottom:10px;
     width:100%;
+    margin-top:80px;
 }
 #footy {
     font-size: 12px;
-    position:absolute;
+    position:relative;
     left:0px;
     bottom:10px;
     width:100%;

@@ -5,7 +5,7 @@ from .. import flask
 IMAP_SERVER = 'webmail.nitt.edu'
 
 # Add remaining dept code  
-DEPARTMENTS = {6: 'CSE', 10: 'ICE', 12: 'META', 14:'PROD', 11:'MECH', 7:'EEE',8:'ECE'}
+DEPARTMENTS = {6: 'CSE', 10: 'ICE', 12: 'META', 14:'PROD', 11:'MECH', 7:'EEE',8:'ECE', 2:'CHEM', 3:'CIVIL', 1:'ARCHI'}
 
 
 def process_username(username):

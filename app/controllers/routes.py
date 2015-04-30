@@ -6,7 +6,7 @@ from app import app, db
 from .forms import LoginForm , MetaData , Search
 from ..models import Department, files,User
 import os
-from .auth import server_login
+from .auth import server_login, DEPARTMENTS
 import stars
 import re 
 from reportlab.lib.pagesizes import letter
@@ -112,6 +112,8 @@ def shownotes(query):
 @app.route('/<name>' , methods = ['GET','POST'])
 def navigate(name):
     if request.method == 'GET':
+        if name not in DEPARTMENTS.values():
+            return redirect(url_for('index'))
         return render_template('semester.html', dept=name, semesters=semesters,search_form = Search())
     elif request.method == 'POST':
         if request.form.get('star'):
@@ -236,8 +238,14 @@ def login():
 
 @app.route('/logout', methods=['GET', 'POST'])
 def logout():
+    print 'hey how are you'
+    print session
+    session.pop('rollnumber', None)
+    session.pop('year', None)
+    session.pop('dept', None)
     session.clear()
-    return redirect(url_for('login'))
+    print session
+    return redirect(url_for('index'))
 
 
 @app.route('/<name>/<semester>/upload', methods=['GET', 'POST'])
@@ -272,8 +280,8 @@ def Upload(name, semester):
                     db.session.add(uploads)
                     db.session.commit()
                 
-                    indexing.apply_async((filename,))
-                    #indexer.index_it(filename, fileFormat)
+                    #indexing.apply_async((filename,))
+                    indexer.index_it(filename, fileFormat)
 
             if picture_files:
                 picture_files =  [app.config['UPLOAD_FOLDER']+'/'+f  for f in picture_files] 

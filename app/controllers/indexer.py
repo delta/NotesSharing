@@ -14,7 +14,7 @@ def index_it(file_name,fileFormat):
     for root, dirs, files in os.walk(basedir+'/../../tmp/'):
         for file in files:
             if str(file) == str(file_name):
-                x = "http://0.0.0.0:8983/solr/firenotes/update/extract?literal.id="+urllib.quote(file,'')+"&commit=true&stream.contentType="+fileFormat+"'"
+                x = "http://0.0.0.0:8983/solr/update/extract?literal.id="+urllib.quote(file,'')+"&commit=true&stream.contentType="+fileFormat+"'"
                 print x
                 y = " -F 'myfile=@"+basedir+"/../../tmp/"+file+"'"
                 cmd = "curl '"
@@ -27,7 +27,7 @@ def search(query):
     c = pycurl.Curl()
     data = BytesIO()
     
-    Q = str('http://0.0.0.0:8983/solr/firenotes/select?q='+query+'&wt=json&indent=true')
+    Q = str('http://0.0.0.0:8983/solr/select?q='+query+'&wt=json&indent=true')
     #Q = "http://0.0.0.0:8983/solr/firenotes/select?wt=json&indent=true&q="+query
     #print 'RESPONSE ' + Q
     c.setopt(c.URL, Q)

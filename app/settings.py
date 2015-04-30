@@ -12,8 +12,9 @@ class Config(object):
     CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 
 class DevConfig(Config):
-    DEBUG = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///../app.db' + '?check_same_thread=False'
+    DEBUG = False
+    SQLALCHEMY_DATABASE_URI = 'mysql+mysqldb://notes:thisisacomplexpassword@localhost/firenotes'
+    #'sqlite:///../app.db' + '?check_same_thread=False'
 
 
 class ProdConfig(Config):
