@@ -238,13 +238,10 @@ def login():
 
 @app.route('/logout', methods=['GET', 'POST'])
 def logout():
-<<<<<<< HEAD
     print session
     session.pop('rollnumber', None)
     session.pop('year', None)
     session.pop('dept', None)
-=======
->>>>>>> parent of 426b835... :star:WORKING COPY
     session.clear()
     return redirect(url_for('login'))
 
@@ -281,8 +278,8 @@ def Upload(name, semester):
                     db.session.add(uploads)
                     db.session.commit()
                 
-                    indexing.apply_async((filename,))
-                    #indexer.index_it(filename, fileFormat)
+                    #indexing.apply_async((filename,))
+                    indexer.index_it(filename, fileFormat)
 
             if picture_files:
                 picture_files =  [app.config['UPLOAD_FOLDER']+'/'+f  for f in picture_files] 

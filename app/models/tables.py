@@ -23,7 +23,7 @@ class Department(db.Model):
 
 
 class files(db.Model):
-    __searchable__ = ['department','description','author','tags','semester'] #array with all the database fields that will be in the searchable index
+    __searchable__ = ['department','description','author','tags'] #array with all the database fields that will be in the searchable index
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(64), index=True)
     department = db.Column(db.String(64), index=True)
