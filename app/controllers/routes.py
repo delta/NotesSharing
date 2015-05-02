@@ -23,8 +23,6 @@ departments = Department.query.all()
 list_departments = []
 for dept in departments:
     list_departments.append(dept.department)
-semesters = [i for i in range(1, 9)]
-
 def allowed_file(filename):
     return '.' in filename and \
         filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
@@ -87,6 +85,7 @@ def shownotes(query):
         except:
             pass
         indexed_search = files.query.whoosh_search(query)
+        print indexed_search
         has_starred = False
         for file in indexed_search:
             try:
@@ -225,6 +224,10 @@ def login():
                         new_entry = User(rollNo = request.form['rollnumber'])
                         db.session.add(new_entry)
                         db.session.commit()
+                #session['rollnumber'] = str(request.form['rollnumber'])
+                #session['year'] = valid_login[1]
+                #session['dept'] = valid_login[2]
+                print session
                 return redirect(url_for('navigate', name=session['dept']))
     
         if request.form.get('query'):  
@@ -235,6 +238,7 @@ def login():
 
 @app.route('/logout', methods=['GET', 'POST'])
 def logout():
+    print session
     session.pop('rollnumber', None)
     session.pop('year', None)
     session.pop('dept', None)
@@ -274,8 +278,8 @@ def Upload(name, semester):
                     db.session.add(uploads)
                     db.session.commit()
                 
-                    indexing.apply_async((filename,))
-                    #indexer.index_it(filename, fileFormat)
+                    #indexing.apply_async((filename,))
+                    indexer.index_it(filename, fileFormat)
 
             if picture_files:
                 picture_files =  [app.config['UPLOAD_FOLDER']+'/'+f  for f in picture_files] 
