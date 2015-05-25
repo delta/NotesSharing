@@ -14,6 +14,12 @@ from reportlab.pdfgen import canvas
 import datetime
 import indexer
 from celery import Celery 
+from PIL import Image 
+import logging
+from logging.handlers import RotatingFileHandler
+handler = RotatingFileHandler('foo.log', maxBytes=10000, backupCount=1)
+handler.setLevel(logging.INFO)
+app.logger.addHandler(handler)
 
 celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
 celery.conf.update(app.config)
@@ -23,6 +29,7 @@ departments = Department.query.all()
 list_departments = []
 for dept in departments:
     list_departments.append(dept.department)
+semesters = [str(i) for i in range(1,9)]
 def allowed_file(filename):
     return '.' in filename and \
         filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
@@ -47,12 +54,16 @@ def faq():
 @app.route('/home', methods = ['GET','POST'])
 def index():
     if request.method == 'GET':
+        app.logger.info('GET REQUEST /index')
         return render_template('home.html', title='FireNotes', x=list_departments,search_form = Search())
     elif request.method == 'POST':
+        app.logger.info('POST REQUEST /index')
         if request.form.get('star'):
             stars.add_star(request.form['file_id'], session['rollnumber'])
             return 'Status Success'
-        
+        elif request.form.get('unstar'):
+            stars.unstar(request.form['file_id'], session['rollnumber'])
+            return 'Star unstarred'
         elif request.form.get('query'):
             query = request.form['query']
             return redirect(url_for('shownotes',query = query))
@@ -62,6 +73,7 @@ def index():
 @app.route('/show/<query>/',methods = ['GET','POST'])
 def shownotes(query):
     if request.method == 'GET':
+        app.logger.info('GET REQUEST /show/query')
         has_starred = False
         list_of_files = []
         all_files = []
@@ -97,10 +109,14 @@ def shownotes(query):
     
     
     elif request.method == 'POST':
+        app.logger.info('POST  REQUEST /show')
         if request.form.get('star'):
             print 'AHAHHA'
             stars.add_star(request.form['file_id'], request.form['user_rno'])
             return 'Status Success'
+        elif request.form.get('unstar'):
+            stars.unstar(request.form['file_id'], session['rollnumber'])
+            return 'Star unstarred'
         if request.form.get('query'):
             query = request.form['query']
             return redirect(url_for('shownotes',query = query))
@@ -110,11 +126,16 @@ def shownotes(query):
 @app.route('/<name>' , methods = ['GET','POST'])
 def navigate(name):
     if request.method == 'GET':
+        app.logger.info('GET REQUEST semester.html')
         return render_template('semester.html', dept=name, semesters=semesters,search_form = Search())
     elif request.method == 'POST':
+        app.logger.info('POST REQUEST semester.html')
         if request.form.get('star'):
             stars.add_star(request.form['file_id'], request.form['user_rno'])
             return "Status Success"
+        elif request.form.get('unstar'):
+            stars.unstar(request.form['file_id'], session['rollnumber'])
+            return 'Star unstarred'
         elif request.form.get('query'):
             query = request.form['query']
             return redirect(url_for('shownotes',query = query))
@@ -126,6 +147,7 @@ def UploadOrView(name, semester):
     form = MetaData() 
     search_form = Search() 
     if request.method == 'GET':
+        app.logger.info('GET REQUEST notes.html')
         '''
                 Get all the files from the db and display to the user
         '''
@@ -144,8 +166,12 @@ def UploadOrView(name, semester):
         return render_template("notes.html", list_of_files=list_of_files, dept=name, sem=semester,form=form,search_form = Search())
 
     elif request.method == 'POST':
+        app.logger.info('POST REQUEST notes.html')
         if request.form.get('star'):
             stars.add_star(request.form['file_id'], request.form['user_rno'])
+        if request.form.get('unstar'):
+            stars.unstar(request.form['file_id'], session['rollnumber'])
+            return 'Star unstarred'
         if request.form.get('query'):  
             query = request.form['query']
             return redirect(url_for('shownotes',query = query))
@@ -177,13 +203,19 @@ def Download(name, semester, filename):
         download_file = checkoutformat.group(1)+'.pdf'
         updated_file = files.query.filter_by(filename = filename).first()
         updated_file.downloads += 1
-        db.session.commit()
+        try:
+            db.session.commit()
+        except:
+            db.session.rollback()
         return send_file("../tmp/" + download_file, attachment_filename=download_file, as_attachment=True)
     else:
         download_file = filename
         updated_file = files.query.filter_by(filename = filename).first()
         updated_file.downloads += 1
-        db.session.commit()
+        try:
+            db.session.commit()
+        except:
+            db.session.rollback()
         return send_file("../tmp/" + download_file, attachment_filename=download_file, as_attachment=True)
 
 
@@ -195,12 +227,18 @@ def fastdownload(filename):
         download_file = checkoutformat.group(1)+'.pdf'
         updated_file = files.query.filter_by(filename = filename).first()
         updated_file.downloads += 1
-        db.session.commit()
+        try:
+            db.session.commit()
+        except:
+            db.session.rollback()
         return send_file("../tmp/" + download_file, attachment_filename=download_file, as_attachment=True)
     else:
         updated_file = files.query.filter_by(filename = filename).first()
         updated_file.downloads += 1
-        db.session.commit()
+        try:
+            db.session.commit()
+        except:
+            db.session.rollback()
         return send_file("../tmp/" + filename, attachment_filename=filename, as_attachment=True)
 
 
@@ -210,26 +248,28 @@ def login():
     search_form = Search()
     form = LoginForm()
     if request.method == 'GET':
+        app.logger.info('GET REQUEST lgin.html')
         return render_template('login.html', title='Sign In', form=form,search_form = Search())
     elif request.method == 'POST':
+        app.logger.info('POST REQUEST login.html')
         # Whether all parts of the form is submitted or not
         if form.validate_on_submit():
             form.rollnumber = request.form['rollnumber']
             valid_login = server_login(request.form['rollnumber'], request.form['password'])
             if not valid_login:
+                print 'session is {0}'.format(session)
                 return redirect(url_for('login'))
             else:
                 user = User.query.filter_by(rollNo = request.form['rollnumber']).all()
                 if not len(user):
-                        new_entry = User(rollNo = request.form['rollnumber'])
-                        db.session.add(new_entry)
+                    new_entry = User(rollNo = request.form['rollnumber'])
+                    db.session.add(new_entry)
+                    try:
                         db.session.commit()
-                #session['rollnumber'] = str(request.form['rollnumber'])
-                #session['year'] = valid_login[1]
-                #session['dept'] = valid_login[2]
-                print session
+                    except:
+                        db.session.rollback()
+                print session 
                 return redirect(url_for('navigate', name=session['dept']))
-    
         if request.form.get('query'):  
             query = request.form['query']
             return redirect(url_for('shownotes',query = query))
@@ -238,11 +278,15 @@ def login():
 
 @app.route('/logout', methods=['GET', 'POST'])
 def logout():
+    form = MetaData() 
+    search_form = Search() 
     print session
     session.pop('rollnumber', None)
     session.pop('year', None)
     session.pop('dept', None)
     session.clear()
+    print 'rollnumber' in session 
+    return render_template('logout.html',form=form,search_form = Search())
     return redirect(url_for('login'))
 
 
@@ -276,22 +320,34 @@ def Upload(name, semester):
                     print ' this shouldnt happen'
                     uploads = files(filename=filename, department=name, semester=semester, author= request.form['author'], tags = request.form['tags'], description = request.form['description'],downloads = 0, uploader = session['rollnumber'], upload_date = datetime.datetime.now())
                     db.session.add(uploads)
-                    db.session.commit()
+                    try:
+                        db.session.commit()
+                    except:
+                        db.session.rollback()
                 
                     #indexing.apply_async((filename,))
                     indexer.index_it(filename, fileFormat)
 
             if picture_files:
                 picture_files =  [app.config['UPLOAD_FOLDER']+'/'+f  for f in picture_files] 
-                c = canvas.Canvas(app.config['UPLOAD_FOLDER'] + '/' + checkformat.group(1)+'.pdf',pagesize=(460.0,820.0))
-                width , height = (460.0,820.0)
+                width, height = 0.0,0.0
+                for pics in picture_files:
+                    im=Image.open(pics)
+                    widht = max(im.size[0],width)
+                    height = max(im.size[1],height)
+                print widht,height
+                c = canvas.Canvas(app.config['UPLOAD_FOLDER'] + '/' + checkformat.group(1)+'.pdf',pagesize=(widht,height))#pagesize=(1500.0,1000.0))
+                #width , height = (1500.0,1020.0)
                 for pics in picture_files:
                     c.drawImage(pics,0,0)
                     c.showPage()
                     c.save()
                 uploads = files(filename=filename,department=name, semester=semester, author= request.form['author'], tags = request.form['tags'], description = request.form['description'],downloads = 0, uploader = session['rollnumber'], upload_date = datetime.datetime.now())
                 db.session.add(uploads)
-                db.session.commit()
+                try:
+                    db.session.commit()
+                except:
+                    db.session.rollback()
             
             all_files = files.query.filter(and_(files.department.like(name),
                                                files.semester.like(int(semester))))

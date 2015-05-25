@@ -41,12 +41,13 @@ def server_login(username, password):
     dept = None
     logged_in = False
     try:
-        username = process_username(username)
-        logged_in = imap_login(username, password)
-        year, dept = parse_username(username)
-        flask.session['rollnumber'] = username
-        flask.session['year'] = year
-        flask.session['dept'] = dept
+        if imap_login(username,password):
+            logged_in = True
+            username = process_username(username)
+            year, dept = parse_username(username)
+            flask.session['rollnumber'] = username
+            flask.session['year'] = year
+            flask.session['dept'] = dept
     except:
          logged_in = False
     return logged_in

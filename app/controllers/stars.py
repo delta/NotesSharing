@@ -17,5 +17,13 @@ def has_starred(file_id, user_rno):
                                       stars.starrer.like(user_rno))).all()
     return len(starred) >= 1
 
+def unstar(file_id,user_rno):
+    if has_starred(file_id,user_rno):
+        starrer = stars.query.filter(and_(stars.file_id(file_id), 
+                                        stars.starrer.like(user_rno))).all()
+        db.session.delete(starrer)
+        db.session.commit()
+        
+
 if __name__=='__main__':
     print get_stars(1)

@@ -18,5 +18,25 @@ function starrer(fid, rno){
 
 	});
     }
+
+    else{
+    	console.log(String(fid));
+		request = $.ajax({
+	    	url: ".",
+	    	type: "post",
+	        data: {
+				unstar: "1",
+				file_id: String(fid),
+				user_rno: rno,
+	    	}
+		});
+		request.done(function (response, textStatus, jqXHR){
+	    	console.log(response);
+	    	document.getElementById("starclass"+fid).className="fa fa-star-o fa-2x";
+	    	down_count = parseInt(document.getElementsByName("count"+fid)[0].innerHTML)+1;
+	    	document.getElementsByName("count"+fid)[0].innerHTML = down_count;
+
+		});	
+    }
 }
 
