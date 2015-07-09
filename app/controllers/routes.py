@@ -8,23 +8,23 @@ from ..models import Department, files,User
 import os
 from .auth import server_login, DEPARTMENTS
 import stars
-import re 
+import re
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 import datetime
 import indexer
-from celery import Celery 
+from celery import Celery
 
 celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
 celery.conf.update(app.config)
 
 fileformat = re.compile(r'(\w*)\.(\w*)')
+
 departments = Department.query.all()
 list_departments = []
 for dept in departments:
     list_departments.append(dept.department)
 semesters = [i for i in range(1, 9)]
-
 def allowed_file(filename):
     return '.' in filename and \
         filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
@@ -43,7 +43,7 @@ def faq():
         if request.form.get('query'):
             query = request.form['query']
             return redirect(url_for('shownotes',query = query))
-    
+
 @app.route('/',methods = ['GET','POST'])
 @app.route('/index', methods = ['GET','POST'])
 @app.route('/home', methods = ['GET','POST'])
@@ -55,12 +55,12 @@ def index():
             print 'AHAHHA'
             stars.add_star(request.form['file_id'], request.form['user_rno'])
             return 'Status Success'
-        
+
         elif request.form.get('query'):
             query = request.form['query']
             return redirect(url_for('shownotes',query = query))
 
-        
+
 @app.route('/show/<query>',methods = ['GET','POST'])
 @app.route('/show/<query>/',methods = ['GET','POST'])
 def shownotes(query):
@@ -79,7 +79,7 @@ def shownotes(query):
                         if uniq[file.filename]:
                             print "Duplicate"
                     except:
-                        list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader, file.upload_date.strftime("%d-%m-%Y %H:%M")))
+                        list_of_files.append((file.filename,file.author,file.tags,file.semester,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader, file.upload_date.strftime("%d-%m-%Y %H:%M")))
                         uniq[file.filename] = True
                     try:
                         has_starred = stars.has_starred(file.id, session['rollnumber'])
@@ -94,15 +94,19 @@ def shownotes(query):
                 has_starred = stars.has_starred(file.id, session['rollnumber'])
             except:
                 pass
-            list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader, file.upload_date.strftime("%d-%m-%Y %H:%M")))
+            list_of_files.append((file.filename,file.author,file.tags,file.semester,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader, file.upload_date.strftime("%d-%m-%Y %H:%M")))
         return render_template('notes.html',list_of_files = list_of_files , search_form = Search())
-    
-    
+
+
     elif request.method == 'POST':
         if request.form.get('star'):
-            print 'AHAHHA'
-            stars.add_star(request.form['file_id'], request.form['user_rno'])
-            return 'Status Success'
+            print 'AHAHH'
+            print '{0} is the form'.format(request.form)
+            if request.form['star'] == '1':
+                stars.add_star(request.form['file_id'], request.form['user_rno'])
+            if request.form['star'] == '-1':
+                stars.reduce_star(request.form['file_id'],request.form['user_rno'])
+            return "FUCK YEAH"
         if request.form.get('query'):
             query = request.form['query']
             return redirect(url_for('shownotes',query = query))
@@ -126,9 +130,9 @@ def navigate(name):
 
 @app.route('/<name>/<semester>', methods=['GET', 'POST'])
 def UploadOrView(name, semester):
-    
-    form = MetaData() 
-    search_form = Search() 
+
+    form = MetaData()
+    search_form = Search()
     if request.method == 'GET':
         '''
                 Get all the files from the db and display to the user
@@ -142,7 +146,7 @@ def UploadOrView(name, semester):
                 has_starred = stars.has_starred(file.id, session['rollnumber'])
             except:
                 pass
-            list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader, file.upload_date.strftime("%d %b %Y %H:%M")))
+            list_of_files.append((file.filename,file.author,file.tags,file.semester,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader, file.upload_date.strftime("%d %b %Y %H:%M")))
 
         list_of_files = list(set(list_of_files))
         return render_template("notes.html", list_of_files=list_of_files, dept=name, sem=semester,form=form,search_form = Search())
@@ -150,7 +154,7 @@ def UploadOrView(name, semester):
     elif request.method == 'POST':
         if request.form.get('star'):
             stars.add_star(request.form['file_id'], request.form['user_rno'])
-        if request.form.get('query'):  
+        if request.form.get('query'):
             query = request.form['query']
             return redirect(url_for('shownotes',query = query))
 
@@ -177,7 +181,7 @@ def serveImages(filename):
 def Download(name, semester, filename):
     checkoutformat = re.search(fileformat,filename)
     if checkoutformat.group(2) in ['jpg','jpeg','png','bmp']:
-        # surely there will be a pdf 
+        # surely there will be a pdf
         download_file = checkoutformat.group(1)+'.pdf'
         updated_file = files.query.filter_by(filename = filename).first()
         updated_file.downloads += 1
@@ -195,7 +199,7 @@ def Download(name, semester, filename):
 def fastdownload(filename):
     checkoutformat = re.search(fileformat,filename)
     if checkoutformat.group(2) in ['jpg','jpeg','png','bmp']:
-        # surely there will be a pdf 
+        # surely there will be a pdf
         download_file = checkoutformat.group(1)+'.pdf'
         updated_file = files.query.filter_by(filename = filename).first()
         updated_file.downloads += 1
@@ -229,8 +233,8 @@ def login():
                         db.session.add(new_entry)
                         db.session.commit()
                 return redirect(url_for('navigate', name=session['dept']))
-    
-        if request.form.get('query'):  
+
+        if request.form.get('query'):
             query = request.form['query']
             return redirect(url_for('shownotes',query = query))
     return render_template('login.html', title='Sign In', form=form,search_form = Search())
@@ -250,9 +254,9 @@ def logout():
 
 @app.route('/<name>/<semester>/upload', methods=['GET', 'POST'])
 def Upload(name, semester):
-    
-    form = MetaData() 
-    search_form = Search() 
+
+    form = MetaData()
+    search_form = Search()
     if request.method == 'GET':
        return render_template("upload.html",dept=name, sem=semester,form=form,search_form = Search())
 
@@ -279,12 +283,12 @@ def Upload(name, semester):
                     uploads = files(filename=filename, department=name, semester=semester, author= request.form['author'], tags = request.form['tags'], description = request.form['description'],downloads = 0, uploader = session['rollnumber'], upload_date = datetime.datetime.now())
                     db.session.add(uploads)
                     db.session.commit()
-                
+
                     #indexing.apply_async((filename,))
-                    indexer.index_it(filename, fileFormat)
+                    #indexer.index_it(filename, fileFormat)
 
             if picture_files:
-                picture_files =  [app.config['UPLOAD_FOLDER']+'/'+f  for f in picture_files] 
+                picture_files =  [app.config['UPLOAD_FOLDER']+'/'+f  for f in picture_files]
                 c = canvas.Canvas(app.config['UPLOAD_FOLDER'] + '/' + checkformat.group(1)+'.pdf',pagesize=(460.0,820.0))
                 width , height = (460.0,820.0)
                 for pics in picture_files:
@@ -294,7 +298,7 @@ def Upload(name, semester):
                 uploads = files(filename=filename,department=name, semester=semester, author= request.form['author'], tags = request.form['tags'], description = request.form['description'],downloads = 0, uploader = session['rollnumber'], upload_date = datetime.datetime.now())
                 db.session.add(uploads)
                 db.session.commit()
-            
+
             all_files = files.query.filter(and_(files.department.like(name),
                                                files.semester.like(int(semester))))
             has_starred = False
@@ -304,7 +308,7 @@ def Upload(name, semester):
                     has_starred = stars.has_starred(file.id, session['rollnumber'])
                 except:
                     pass
-                list_of_files.append((file.filename,file.author,file.tags,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader, file.upload_date.strftime("%d-%m-%Y %H:%M")))
+                list_of_files.append((file.filename,file.author,file.tags,file.semester,file.description,file.downloads, (has_starred, stars.get_stars(file.id), file.id), file.uploader, file.upload_date.strftime("%d-%m-%Y %H:%M")))
             return redirect(url_for('UploadOrView',name=name, semester=semester) )
         else:
             return redirect(url_for('navigate'))

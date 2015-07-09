@@ -20,6 +20,7 @@
 				<th>File Name</th>
 				<th>Author</th>
 				<th>Tags</th>
+				<th>Semester</th>
 				<th>Subject/Descripton</th>
 				<th>Downloads</th>
 				<th>Stars</th>
@@ -47,26 +48,33 @@
 					{{file[4]}} 
 				</td>
 				<td>
-                                        {% if (not file[5][0])  and session['rollnumber'] %} <!--and session['dept']==dept %}-->
+					{{file[5]}}
+				</td>
+				<td>
+                {% if (not file[6][0])  and session['rollnumber'] %}
 					<div id="starlink">
-					  <a onclick='starrer({{file[5][2]}}, {{session['rollnumber']}});'>
-					    <i id="starclass{{file[5][2]}}" class="fa fa-star-o fa-2x"></i>
+					  <a onclick='starrer({{file[6][2]}}, {{session['rollnumber']}});'>
+					    <i id="starclass{{file[6][2]}}" class="fa fa-star-o fa-2x"></i>
 					  </a>
+                      
 					</div>			
 					{%else%}
 					<div>
-						<a href="#"><i class="fa fa-star fa-2x"></i></a>
+                        <a onclick='starrer({{file[6][2]}},{{session['rollnumber']}});'>
+                            <i id="starclass{{file[6][2]}}" class="fa fa-star fa-2x"></i>
+                        </a>
+                            <!--<a href="#"><i class="fa fa-star fa-2x"></i></a> -->
 					</div>
 					{% endif %}
 					<div>
-						&nbsp;&nbsp;<span name="count{{file[5][2]}}" id='{{file[5][2]}}'>{{file[5][1]}} </span>
+						&nbsp;&nbsp;<span name="count{{file[6][2]}}" id='{{file[6][2]}}'>{{file[6][1]}} </span>
 					</div>
 				</td>
 				<td>
-					{{file[6]}} 
+					{{file[7]}} 
 				</td>
 				<td>
-					{{file[7]}} 
+					{{file[8]}} 
 				</td>
 				<td>
 					{% if dept %}

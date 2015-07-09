@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="jumbotron" align="center">
+  
+	<ul class="pager">
+                <li><a href="/home">Go back</a></li>
+        </ul>
+	<h4> Welcome to {{dept}} </h4>
+	<br>                   
+	{% for information in file %}
+	{% endfor %}
+	
+</div>
+
+<footer>
+	<div align="center">
+		Made with &hearts; by Delta Force
+		<br>
+
+	</div>
+</footer>
+
+{% endblock %}

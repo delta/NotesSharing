@@ -31,3 +31,4 @@ reportlab
 requests
 celery
 redis
+
