@@ -4,7 +4,7 @@ from .. import flask
 
 IMAP_SERVER = 'webmail.nitt.edu'
 
-# Add remaining dept code  
+# Add remaining dept code
 DEPARTMENTS = {6: 'CSE', 10: 'ICE', 12: 'META', 14:'PROD', 11:'MECH', 7:'EEE',8:'ECE', 2:'CHEM', 3:'CIVIL', 1:'ARCHI'}
 
 
@@ -45,11 +45,12 @@ def server_login(username, password):
         logged_in = imap_login(username, password)
         year, dept = parse_username(username)
         # Yet to test the session.
-        flask.session['rollnumber'] = username
-        flask.session['year'] = year
-        flask.session['dept'] = dept
+        #flask.session['rollnumber'] = username
+        #flask.session['year'] = year
+        #flask.session['dept'] = dept
     except:
          logged_in = False
-    return logged_in
+    finally:
+        return (logged_in,year,dept)
 
 print server_login('106112091', 'sriramwebmail')

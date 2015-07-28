@@ -2,7 +2,21 @@ from app import db
 
 class User(db.Model):
     rollNo = db.Column(db.Integer, primary_key=True)
+    year = db.Column(db.Integer)
+    dept = db.Column(db.String(60))
+    authenticated= db.Column(db.Boolean,default=False)
     #nickname = db.Column(db.String(64), index=True)
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return self.rollNo
 
     def __repr__(self):
         return '<User %r>' % (self.rollNo)
@@ -29,7 +43,7 @@ class files(db.Model):
     department = db.Column(db.String(64), index=True)
     semester = db.Column(db.Integer, index=True)
     author = db.Column(db.String(64) , index =True)
-    tags = db.Column(db.String(64) , index= True) 
+    tags = db.Column(db.String(64) , index= True)
     description = db.Column(db.String(100) , index= True)
     downloads = db.Column(db.Integer , index = True)
     uploader = db.Column(db.String(64)  , index = True)

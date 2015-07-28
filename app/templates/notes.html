@@ -6,7 +6,7 @@
 	<ul class="pager">
 		<li><a href="/{{dept}}">Go back</a></li>
 	</ul>  
-	{% if (session['rollnumber'] and session['dept']==dept) or dept==9 %}
+	{% if g.user.is_authenticated() and g.user.dept == dept %}
 	<a class="btn btn-primary btn-sm" href="/{{dept}}/{{sem}}/upload">Upload</a>
 	<br>
 	<br>
@@ -26,6 +26,7 @@
 				<th>Stars</th>
 				<th>Owner</th>
 				<th>Upload Date</th>
+				<th>Department</th>
 				<th>Download Me</th>
 			</tr>
 		</thead>
@@ -51,16 +52,16 @@
 					{{file[5]}}
 				</td>
 				<td>
-                {% if (not file[6][0])  and session['rollnumber'] %}
+                {% if (not file[6][0])  and g.user.is_authenticated() %}
 					<div id="starlink">
-					  <a onclick='starrer({{file[6][2]}}, {{session['rollnumber']}});'>
+						<a onclick='starrer({{file[6][2]}}, {{g.user.rollNo}});'>
 					    <i id="starclass{{file[6][2]}}" class="fa fa-star-o fa-2x"></i>
 					  </a>
                       
 					</div>			
 					{%else%}
 					<div>
-                        <a onclick='starrer({{file[6][2]}},{{session['rollnumber']}});'>
+						<a onclick='starrer({{file[6][2]}},{{g.user.rollNo}});'>
                             <i id="starclass{{file[6][2]}}" class="fa fa-star fa-2x"></i>
                         </a>
                             <!--<a href="#"><i class="fa fa-star fa-2x"></i></a> -->
@@ -77,10 +78,13 @@
 					{{file[8]}} 
 				</td>
 				<td>
+					{{ file[9] }}
+				</td>
+				<td>
 					{% if dept %}
 					<a class="btn btn-success" href="/{{dept}}/{{sem}}/{{file[0]}}">Download</a>
 					{% else %}
-					<a class="btn" href="/filename/{{file[0]}}">Download</a>
+					<a class="btn" href="/{{file[9]}}/{{file[3]}}/{{file[0]}}">Download</a>
 					{% endif %}
 				</td>
 

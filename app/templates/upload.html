@@ -9,7 +9,7 @@
 
 	<div style="width:30%; margin:0 auto;">
 		<h4>Upload Notes, Books et al.</h4>
-{% if session['rollnumber'] and session['dept']==dept %}
+		{% if g.user.is_authenticated() and g.user.dept==dept %}
 	
 		<form action="" method=post enctype="multipart/form-data">
 			{{ form.hidden_tag() }}

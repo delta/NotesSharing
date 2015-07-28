@@ -1,10 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
 
-
                 <div class="jumbotron">
-                  {% if session['rollnumber'] %}
-                  <h4 align="center">Welcome {{session['rollnumber']}} </h4>
+                  {% if g.user.is_authenticated() %}
+                    <h4 align="center">Welcome </h4>
                   {% endif %}   
                   <br>
                         <div align="center">

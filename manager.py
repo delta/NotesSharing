@@ -26,5 +26,4 @@ def create_db():
 def delete_db():
         db.drop_all()
 
-        
 manager.run()

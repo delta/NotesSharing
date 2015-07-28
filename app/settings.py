@@ -1,4 +1,4 @@
-import os 
+import os
 class Config(object):
     SECRET_KEY = 'HAHAHAH-FUCK-YOU'
     basedir = os.path.abspath(os.path.dirname(__file__))
@@ -10,7 +10,7 @@ class Config(object):
     WHOOSH_BASE = os.path.join(basedir, 'search.db') #A special database that is dedicated to full text search
     CELERY_BROKER_URL = 'redis://localhost:6379/0'
     CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
-
+    DEBUG = True
 class DevConfig(Config):
     DEBUG = False
     SQLALCHEMY_DATABASE_URI = 'mysql+mysqldb://notes:thisisacomplexpassword@localhost/firenotes'
